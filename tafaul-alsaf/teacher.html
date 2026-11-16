@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-mode="teacher">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تصويت الصف · المعلم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* تخطيط: شاشة عرض للصف — السؤال في الأعلى، رمز الدخول بجانب أعمدة النتائج. ألوان عنابية قطرية مع ذهبي */
+:root{
+  --bg:#f7f2f0; --surface:#ffffff; --ink:#2b1018; --muted:#6e5560; --line:#e6d9dc;
+  --maroon:#8a1538; --maroon-ink:#ffffff; --gold:#b8892c; --gold-ink:#241703;
+  --bar:#8a1538; --bar-soft:#f2e3e7; --ok:#2e7d4f; --warn:#b4372f;
+  --font:"Tajawal",Tahoma,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1a0d11; --surface:#251419; --ink:#f4eaed; --muted:#bca4ac; --line:#3d252c;
+  --maroon:#b8304f; --maroon-ink:#ffffff; --gold:#e2b55c; --gold-ink:#241703;
+  --bar:#c94a6c; --bar-soft:#3a1d25; --ok:#6cc68f; --warn:#ef8a6f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1a0d11; --surface:#251419; --ink:#f4eaed; --muted:#bca4ac; --line:#3d252c;
+  --maroon:#b8304f; --maroon-ink:#ffffff; --gold:#e2b55c; --gold-ink:#241703;
+  --bar:#c94a6c; --bar-soft:#3a1d25; --ok:#6cc68f; --warn:#ef8a6f; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:max(20px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-bottom,0px));min-height:100vh}
+h1,h2,h3{font-weight:800;text-wrap:balance;margin:0;line-height:1.3}
+.wrap{max-width:1180px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.2rem;color:var(--maroon);text-decoration:none}
+.logo i{width:12px;height:28px;background:var(--maroon);border-radius:3px;
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 90%,0 80%,40% 70%,0 60%,40% 50%,0 40%,40% 30%,0 20%,40% 10%)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:16px;min-width:0}
+label{display:block;font-weight:700}
+input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+textarea{resize:vertical;min-height:110px;line-height:1.7}
+input:focus-visible,textarea:focus-visible,summary:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.field{display:flex;flex-direction:column;gap:6px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt-row{display:flex;gap:8px;align-items:center}
+.opt-row span{color:var(--muted);font-weight:700;width:1.6em;text-align:center;flex:none}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px}
+button.primary{background:var(--maroon);color:var(--maroon-ink);border-color:transparent;font-weight:700}
+button.gold{background:var(--gold);color:var(--gold-ink);border-color:transparent;font-weight:700}
+button.ghost{background:transparent}
+button.small{padding:5px 12px;font-size:.88rem}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hint{color:var(--muted);font-size:.92rem}
+.err{color:var(--warn);font-weight:500}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:10px 14px;font-weight:700;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--maroon);border-bottom-color:var(--maroon)}
+.home{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+@media (max-width:820px){.home{grid-template-columns:1fr}}
+.side{display:flex;flex-direction:column;gap:22px}
+.qblock{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.qblock header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qblock header b{color:var(--maroon)}
+.saved{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.saved a{display:flex;justify-content:space-between;gap:10px;color:var(--ink);text-decoration:none;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.saved a:hover{border-color:var(--maroon)}
+.saved small{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.copyline{display:flex;gap:8px;align-items:center}
+.copyline input{direction:ltr;font-size:.85rem}
+
+/* شاشة العرض */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:1fr}}
+.q{font-size:clamp(1.7rem,3.8vw,3rem)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid var(--line)}
+.status i{width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.status.closed i{background:var(--warn)}
+.step{font-weight:700;color:var(--maroon);font-variant-numeric:tabular-nums}
+.bars{display:flex;flex-direction:column;gap:16px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:baseline}
+.bar .name{font-size:clamp(1.1rem,2vw,1.45rem);font-weight:500;min-width:0;overflow-wrap:anywhere}
+.bar .num{font-variant-numeric:tabular-nums;font-weight:800;font-size:clamp(1.1rem,2vw,1.45rem)}
+.bar .num small{color:var(--muted);font-weight:500;font-size:.8em;margin-inline-start:6px}
+.track{grid-column:1/-1;height:clamp(18px,3vw,30px);background:var(--bar-soft);border-radius:8px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--bar);border-radius:8px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bar.lead .fill{background:var(--gold)}
+.total{color:var(--muted);font-variant-numeric:tabular-nums}
+.join{align-items:center;text-align:center;gap:12px}
+.qrbox{background:#fff;padding:14px;border-radius:12px;line-height:0}
+.qrbox img,.qrbox canvas{width:230px;height:230px;max-width:100%}
+.code{font-weight:800;font-size:2.6rem;letter-spacing:.18em;direction:ltr;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--maroon)}
+.url{direction:ltr;font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.nav{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+
+/* شاشة الطالب */
+.vote{max-width:560px;margin-inline:auto;width:100%}
+.choices{display:flex;flex-direction:column;gap:12px}
+.choice{text-align:start;padding:16px 18px;font-size:1.15rem;font-weight:500;border-width:2px;display:flex;gap:12px;align-items:center}
+.choice .k{color:var(--maroon);font-weight:800;flex:none}
+.choice[aria-pressed="true"]{border-color:var(--maroon);background:var(--bar-soft)}
+.done{padding:12px 14px;border-radius:10px;background:var(--bar-soft);font-weight:500}
+.choice:disabled{opacity:1;cursor:default}
+.choice:disabled:not([aria-pressed="true"]){opacity:.55}
+.choice.is-correct{border-color:var(--ok)}
+.choice.is-correct .k{color:var(--ok)}
+.res{padding:14px 16px;border-radius:10px;font-weight:700;font-size:1.1rem}
+.res.good{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.res.bad{background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)}
+.who{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.92rem;color:var(--muted)}
+.who button{padding:2px 10px;font-size:.85rem}
+
+/* نوع السؤال */
+.types{display:flex;gap:6px;flex-wrap:wrap}
+.types label{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:.92rem;padding:6px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:var(--surface)}
+.types label:has(input:checked){border-color:var(--maroon);color:var(--maroon);font-weight:700}
+.types input{accent-color:var(--maroon);margin:0}
+.corr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.corr label{font-size:.92rem}
+select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;max-width:100%}
+
+/* إضافات شاشة العرض */
+.kind{font-size:.85rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--bar-soft);color:var(--maroon)}
+.bar.correct .fill{background:var(--ok)}
+.bar.correct .name{color:var(--ok);font-weight:700}
+.bar.dim .fill{opacity:.45}
+.wait{display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 10px;border:2px dashed var(--line);border-radius:14px;text-align:center}
+.wait b{font-size:clamp(3rem,7vw,5rem);line-height:1;color:var(--maroon);font-variant-numeric:tabular-nums}
+.names h3{font-size:1.05rem;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{padding:4px 12px;border-radius:999px;background:color-mix(in srgb,var(--ok) 14%,transparent);font-weight:500}
+.overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.overlay .panel{width:min(640px,100%);max-height:85vh;overflow:auto}
+.board{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.board td,.board th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:start}
+.board th{color:var(--muted);font-weight:500;font-size:.9rem}
+.board tr:first-child td{font-weight:800;color:var(--maroon)}
+
+/* دروسي */
+.lessons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.lesson{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.lh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.lt{display:flex;flex-direction:column;min-width:0}
+.lt b{font-size:1.1rem;overflow-wrap:anywhere}
+.lt small{color:var(--muted);font-variant-numeric:tabular-nums}
+.lesson details summary{cursor:pointer;color:var(--maroon);font-weight:500;font-size:.92rem}
+.runs{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.runs li{display:flex;justify-content:space-between;gap:10px;font-size:.92rem}
+.runs a{color:var(--ink)}
+.runs small{color:var(--muted);flex:none}
+
+/* الإجابات المكتوبة */
+.wall{display:flex;flex-direction:column;gap:14px}
+.walltools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:7px 14px;background:var(--surface)}
+.seg button[aria-pressed="true"]{background:var(--maroon);color:var(--maroon-ink);font-weight:700}
+.tgl{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:.92rem;cursor:pointer}
+.tgl input{accent-color:var(--maroon)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.acard{border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px;min-width:0;animation:pop .35s ease-out}
+.acard.m-ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--surface))}
+.acard.m-no{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 7%,var(--surface))}
+.acard.m-emo{border-color:var(--gold)}
+.atext{margin:0;font-size:1.2rem;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
+.aname{color:var(--muted);font-size:.88rem}
+.marks{display:flex;flex-wrap:wrap;gap:2px;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px}
+.marks button{padding:2px 4px;min-width:30px;font-size:1rem;line-height:1.6;border-radius:8px;background:transparent;border-color:transparent;filter:grayscale(.6);opacity:.75}
+.marks button:hover{opacity:1;filter:none;border-color:var(--line)}
+.marks button[aria-pressed="true"]{opacity:1;filter:none;background:var(--bar-soft);border-color:var(--maroon)}
+.marks .mk-ok{color:var(--ok);font-weight:800}
+.marks .mk-no{color:var(--warn);font-weight:800}
+.cloud{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 22px;padding:26px 10px;min-height:220px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.cloud .w{font-weight:800;line-height:1.2;text-align:center;overflow-wrap:anywhere;max-width:100%;animation:pop .35s ease-out}
+.cloud .w sup{font-size:.45em;color:var(--muted);font-weight:500;margin-inline-start:2px}
+.cloud .c0{color:var(--maroon)} .cloud .c1{color:var(--gold)} .cloud .c2{color:var(--ink)} .cloud .c3{color:var(--bar)}
+.tform{display:flex;flex-direction:column;gap:10px}
+.tform label{font-weight:700}
+.tform textarea{font-size:1.1rem;min-height:110px}
+.mytext{margin:4px 0 0;font-size:1.15rem;font-weight:500;overflow-wrap:anywhere}
+.res.emo{background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--ink)}
+.bigemo{font-size:1.8rem;vertical-align:middle;margin-inline-start:6px}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+
+/* أسماء من أجاب */
+.bar .wl{grid-column:1/-1;margin-top:6px}
+.chips.wl span{font-size:.9rem;padding:2px 10px;background:var(--bar-soft)}
+.bar.correct .wl span{background:color-mix(in srgb,var(--ok) 16%,transparent)}
+.wait .wl{justify-content:center;max-width:100%}
+.namestgl{justify-content:center;padding:6px 0}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}.acard,.cloud .w{animation:none}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app">
+  <div class="brand"><span class="logo"><i></i>تصويت الصف</span></div>
+  <div class="panel"><p class="hint">جارٍ التحميل…</p></div>
+</main>
+<script>
+const SB_URL = "https://pqkaotqtwdaoolbjzpyk.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxa2FvdHF0d2Rhb29sYmp6cHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTM5NjMsImV4cCI6MjEwNzU2OTk2M30.v4tzdA3pG_ViauyjOcjWsEb-WoSHJoOmZfQPK9HqZsM";
+const LETTERS = ["أ","ب","ج","د","هـ","و","ز","ح"];
+const app = document.getElementById("app");
+const params = new URLSearchParams(location.search);
+
+async function rpc(fn, body){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {method:"POST",
+    headers:{"Content-Type":"application/json", apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`},
+    body: JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+function esc(s){const d=document.createElement("div");d.textContent=String(s??"");return d.innerHTML}
+const IS_TEACHER = document.documentElement.dataset.mode === "teacher";
+const STUDENT = location.origin + "/tafaul-alsaf/";
+const TEACHER = location.origin + "/tafaul-alsaf/teacher.html";
+function base(){ return IS_TEACHER ? TEACHER : STUDENT; }
+function brand(extra=""){
+  const logo = IS_TEACHER ? `<a class="logo" href="${TEACHER}"><i></i>تصويت الصف · المعلم</a>` : `<span class="logo"><i></i>تصويت الصف</span>`;
+  return `<div class="brand">${logo}${extra}</div>`; }
+function store(k,v){ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)||"null"); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; } }
+const lines=t=>t.split("\n").map(s=>s.trim()).filter(Boolean);
+let uid=0;
+
+/* ---------- كتلة سؤال قابلة للتحرير (نص + خيارات + نوع) ---------- */
+function qBlock({q="", opts="", correct=null, type=null, removable=true, onRemove}={}){
+  const id=++uid, b=document.createElement("div"); b.className="qblock";
+  b.innerHTML=`<header><b></b>${removable?`<button type="button" class="ghost small">حذف</button>`:""}</header>
+    <input type="text" id="q${id}" maxlength="300" placeholder="نص السؤال" aria-label="نص السؤال">
+    <textarea id="o${id}" placeholder="الخيار الأول&#10;الخيار الثاني" aria-label="الخيارات، كل خيار في سطر" style="min-height:96px"></textarea>
+    <div class="types" role="radiogroup" aria-label="نوع السؤال">
+      <label><input type="radio" name="t${id}" value="poll"> تصويت رأي</label>
+      <label><input type="radio" name="t${id}" value="quiz"> له إجابة صحيحة</label>
+      <label><input type="radio" name="t${id}" value="text"> إجابة مكتوبة</label>
+    </div>
+    <p class="hint texthint" hidden>يكتب كل طالب إجابته بحرية، وتظهر على شاشتك فوراً لتقيّمها.</p>
+    <div class="corr" hidden><label for="c${id}">الإجابة الصحيحة:</label><select id="c${id}"></select></div>`;
+  const qi=b.querySelector("input[type=text]"), ta=b.querySelector("textarea"), sel=b.querySelector("select"), corr=b.querySelector(".corr");
+  qi.value=q; ta.value=opts;
+  const fill=()=>{ const keep=sel.value; const o=lines(ta.value);
+    sel.innerHTML=o.map((t,i)=>`<option value="${i}">${LETTERS[i]||i+1}. ${esc(t)}</option>`).join("");
+    if(keep!=="" && +keep<o.length) sel.value=keep; };
+  const th=b.querySelector(".texthint");
+  const setType=t=>{ b.querySelector(`input[value=${t}]`).checked=true; corr.hidden=t!=="quiz"; ta.hidden=t==="text"; th.hidden=t!=="text"; };
+  ta.addEventListener("input",fill); fill();
+  b.querySelectorAll("input[type=radio]").forEach(r=>r.onchange=()=>setType(r.value));
+  setType(type==="text"?"text":correct===null?"poll":"quiz"); if(correct!==null) sel.value=String(correct);
+  if(removable) b.querySelector("header button").onclick=()=>onRemove&&onRemove(b);
+  b.read=()=>{ const t=b.querySelector("input[type=radio]:checked").value;
+    if(t==="text") return {q:qi.value.trim(), type:"text", options:[], correct:null};
+    const options=lines(ta.value);
+    return {q:qi.value.trim(), type:"choice", options, correct: t==="quiz" && options.length ? +sel.value : null}; };
+  return b;
+}
+function checkQ(x){ if(!x.q) return "يحتاج نصاً"; if(x.type==="text") return null; if(x.options.length<2||x.options.length>8) return "يحتاج من خيارين إلى ثمانية"; return null; }
+
+/* ================= صفحة المعلم: الدخول بكلمة المرور ================= */
+const PASS_KEY = "teacher_pass";
+async function teacherGate(then){
+  const saved = store(PASS_KEY);
+  if(saved){
+    let ok = null; try{ ok = await rpc("live_admin_check",{p_pass:saved}); }catch(e){}
+    if(ok !== false) return then(saved);       // ok أو تعذّر الاتصال
+  }
+  let has = true; try{ has = await rpc("live_admin_status",{}); }catch(e){}
+  app.innerHTML = brand() + `
+  <form class="panel vote" id="pf">
+    <h1 style="font-size:1.5rem">${has ? "دخول المعلم" : "اختر كلمة مرور للمعلم"}</h1>
+    <p class="hint">${has ? "اكتب كلمة المرور. ستُحفظ على هذا الجهاز فلا تحتاج كتابتها مرة أخرى."
+      : "كلمة المرور تحمي دروسك، وستحتاجها عند فتح صفحة المعلم من جهاز آخر. ستة أحرف على الأقل."}</p>
+    <div class="field"><label for="pw">كلمة المرور</label>
+      <input type="password" id="pw" autocomplete="${has ? "current-password" : "new-password"}"></div>
+    ${has ? "" : `<div class="field"><label for="pw2">أعد كتابتها</label><input type="password" id="pw2" autocomplete="new-password"></div>`}
+    <button class="primary" type="submit" id="pb">${has ? "دخول" : "حفظ والمتابعة"}</button>
+    <span class="err" id="perr"></span>
+  </form>`;
+  const pw = document.getElementById("pw"), err = document.getElementById("perr"), pb = document.getElementById("pb");
+  pw.focus();
+  document.getElementById("pf").onsubmit = async e => {
+    e.preventDefault(); err.textContent = "";
+    const v = pw.value;
+    if(!has){
+      if(v.length < 6) return err.textContent = "كلمة المرور قصيرة. اكتب ستة أحرف على الأقل.";
+      if(v !== document.getElementById("pw2").value) return err.textContent = "الكلمتان غير متطابقتين.";
+    }
+    pb.disabled = true;
+    let ok = false;
+    try{ ok = await rpc(has ? "live_admin_check" : "live_admin_setup", {p_pass:v}); }catch(x){ err.textContent = "تعذّر الاتصال. حاول مرة أخرى."; pb.disabled = false; return; }
+    if(!ok){ err.textContent = has ? "كلمة المرور غير صحيحة." : "تعذّر حفظ كلمة المرور. حدّث الصفحة وحاول مرة أخرى."; pb.disabled = false; return; }
+    store(PASS_KEY, v); then(v);
+  };
+}
+
+function fmtDate(s){
+  try{ return new Date(s).toLocaleString("ar-QA",{weekday:"long",day:"numeric",month:"long",hour:"numeric",minute:"2-digit"}); }
+  catch(e){ return String(s).slice(0,16).replace("T"," "); }
+}
+
+/* ================= صفحة المعلم الرئيسية: دروسي ================= */
+function home(pass){
+  const studentHost = STUDENT.replace(/^https?:\/\//,"").replace(/\/$/,"");
+  app.innerHTML = brand(`<button class="ghost small" id="logout">خروج من هذا الجهاز</button>`) + `
+  <div class="home">
+    <section class="panel" id="main"></section>
+    <div class="side">
+      <section class="panel">
+        <h3>رابط الطلاب</h3>
+        <p class="hint">الطلاب يمسحون رمز QR من شاشة العرض، أو يفتحون هذا الرابط ويكتبون الرمز:</p>
+        <div class="url" style="font-size:1rem;font-weight:700;color:var(--maroon)">${esc(studentHost)}</div>
+      </section>
+      <section class="panel">
+        <h3>كيف تستخدم دروسك</h3>
+        <p class="hint">احفظ الدرس مرة واحدة. في كل حصة اضغط <b>ابدأ الحصة</b> فتبدأ نسخة جديدة بلا إجابات قديمة، وتبقى نتائج الحصص السابقة محفوظة تحت الدرس.</p>
+      </section>
+    </div>
+  </div>`;
+  document.getElementById("logout").onclick = () => { store(PASS_KEY, null); location.reload(); };
+  const main = document.getElementById("main");
+
+  const tabs = active => `<div class="tabs" role="tablist">${[["lessons","دروسي"],["new","درس جديد"],["quick","سؤال سريع"]]
+    .map(([k,t]) => `<button role="tab" data-v="${k}" aria-selected="${k===active}">${t}</button>`).join("")}</div>`;
+  const wireTabs = () => main.querySelectorAll(".tabs button").forEach(b => b.onclick = () =>
+    ({lessons:() => showLessons(), new:() => showEditor(null), quick:showQuick})[b.dataset.v]());
+
+  async function showLessons(note=""){
+    main.innerHTML = tabs("lessons") + (note ? `<div class="done">${esc(note)}</div>` : "") + `<div id="ll"><p class="hint">جارٍ تحميل دروسك…</p></div>`;
+    wireTabs();
+    let list = null; try{ list = await rpc("live_lessons",{p_pass:pass}); }catch(e){}
+    const ll = document.getElementById("ll");
+    if(list === null){ ll.innerHTML = `<p class="err">تعذّر تحميل الدروس. تحقق من الاتصال ثم حدّث الصفحة.</p>`; return; }
+    if(!list.length){
+      ll.innerHTML = `<div class="wait"><span>لا توجد دروس محفوظة بعد.</span><button class="primary" id="first">أنشئ أول درس</button></div>`;
+      document.getElementById("first").onclick = () => showEditor(null); return;
+    }
+    ll.innerHTML = `<ul class="lessons">${list.map((l,i) => `
+      <li class="lesson" data-i="${i}">
+        <div class="lh">
+          <div class="lt"><b>${esc(l.title)}</b><small>${l.count} أسئلة · ${l.runs.length ? `قُدّم ${l.runs.length} مرة` : "لم يُقدَّم بعد"}</small></div>
+          <div class="row"><button class="primary" data-a="start">ابدأ الحصة</button><button data-a="edit">تعديل</button><button class="ghost" data-a="del">حذف</button></div>
+        </div>
+        ${l.runs.length ? `<details><summary>الحصص السابقة ونتائجها</summary><ul class="runs">${l.runs.map(r =>
+          `<li><a href="${TEACHER}?c=${r.code}&k=${r.key}">${esc(fmtDate(r.created_at))}</a><small>${r.students} طالب</small></li>`).join("")}</ul></details>` : ""}
+      </li>`).join("")}</ul>`;
+    ll.onclick = async e => {
+      const b = e.target.closest("button[data-a]"); if(!b) return;
+      const l = list[+b.closest(".lesson").dataset.i];
+      if(b.dataset.a === "start"){
+        b.disabled = true; b.textContent = "جارٍ التجهيز…";
+        let r = null; try{ r = await rpc("live_lesson_start",{p_pass:pass,p_code:l.code}); }catch(x){}
+        if(r){ location.href = `${TEACHER}?c=${r.code}&k=${r.key}`; return; }
+        b.disabled = false; b.textContent = "تعذّر البدء، حاول مجدداً";
+      } else if(b.dataset.a === "edit"){
+        showEditor(l.code);
+      } else if(b.dataset.a === "del"){
+        if(b.dataset.c !== "1"){ b.dataset.c = "1"; b.textContent = "اضغط مرة أخرى للحذف"; setTimeout(() => { b.dataset.c = ""; b.textContent = "حذف"; }, 3000); return; }
+        b.disabled = true;
+        try{ await rpc("live_lesson_archive",{p_pass:pass,p_code:l.code}); }catch(x){}
+        showLessons("تم حذف الدرس.");
+      }
+    };
+  }
+
+  async function showEditor(code){
+    main.innerHTML = tabs(code ? "" : "new") + `
+      <form id="setf" style="display:flex;flex-direction:column;gap:16px">
+        <h2 style="font-size:1.3rem">${code ? "تعديل الدرس" : "درس جديد"}</h2>
+        <div class="field"><label for="st">اسم الدرس</label><input type="text" id="st" maxlength="200" placeholder="مثال: علوم – الصف الثامن: الطاقة المتجددة"></div>
+        <div id="qs" style="display:flex;flex-direction:column;gap:12px"><p class="hint">${code ? "جارٍ التحميل…" : ""}</p></div>
+        <div class="row"><button type="button" class="ghost" id="addq">+ سؤال</button><span class="hint">اكتب كل خيار في سطر</span></div>
+        <div class="row"><button class="primary" type="submit" id="saveset">${code ? "احفظ التعديلات" : "احفظ الدرس"}</button>
+          <button type="button" class="ghost" id="cancel">رجوع إلى دروسي</button><span class="err" id="serr"></span></div>
+      </form>`;
+    wireTabs();
+    document.getElementById("cancel").onclick = () => showLessons();
+    const qs = document.getElementById("qs");
+    const renum = () => [...qs.children].forEach((b,i) => { const h = b.querySelector("header b"); if(h) h.textContent = `السؤال ${i+1}`; });
+    const remove = b => { if(qs.children.length > 1){ b.remove(); renum(); } };
+    const addQ = o => { if(qs.children.length >= 40) return; qs.appendChild(qBlock({...o, onRemove:remove})); renum(); };
+    document.getElementById("addq").onclick = () => addQ({});
+    let data = {title:"", questions:[]};
+    if(code){
+      try{ data = await rpc("live_lesson_get",{p_pass:pass,p_code:code}) || data; }catch(e){}
+    }
+    qs.innerHTML = "";
+    document.getElementById("st").value = data.title || "";
+    if(data.questions && data.questions.length)
+      data.questions.forEach(q => addQ({q:q.q, opts:(q.options||[]).join("\n"), correct:(q.correct ?? null), type:q.type}));
+    else addQ({});
+
+    document.getElementById("setf").onsubmit = async e => {
+      e.preventDefault();
+      const err = document.getElementById("serr"), title = document.getElementById("st").value.trim();
+      const questions = [...qs.children].map(b => b.read());
+      if(!title) return err.textContent = "اكتب اسم الدرس.";
+      for(let i=0;i<questions.length;i++){ const m = checkQ(questions[i]); if(m) return err.textContent = `السؤال ${i+1} ${m}.`; }
+      const btn = document.getElementById("saveset"); btn.disabled = true; err.textContent = "";
+      let saved = null; try{ saved = await rpc("live_lesson_save",{p_pass:pass,p_code:code,p_title:title,p_questions:questions}); }catch(x){}
+      if(!saved){ err.textContent = "تعذّر الحفظ. تحقق من الاتصال وحاول مرة أخرى."; btn.disabled = false; return; }
+      showLessons(code ? "تم حفظ التعديلات." : "تم حفظ الدرس. اضغط «ابدأ الحصة» عندما تدخل الصف.");
+    };
+  }
+
+  function showQuick(){
+    main.innerHTML = tabs("quick") + `
+      <form id="onef" style="display:flex;flex-direction:column;gap:16px">
+        <p class="hint">سؤال واحد يبدأ فوراً ولا يُحفظ في دروسك.</p>
+        <div id="one"></div>
+        <div class="row"><button class="primary" type="submit" id="go1">ابدأ الآن</button><span class="err" id="oerr"></span></div>
+      </form>`;
+    wireTabs();
+    const one = qBlock({q:"اكتب معلومة واحدة تعلّمتها اليوم", opts:"نعم، تماماً\nإلى حد ما\nأحتاج إلى شرح إضافي", type:"text", removable:false});
+    one.querySelector("header b").textContent = "السؤال";
+    document.getElementById("one").appendChild(one);
+    document.getElementById("onef").onsubmit = async e => {
+      e.preventDefault();
+      const err = document.getElementById("oerr"), x = one.read(), m = checkQ(x);
+      if(m) return err.textContent = `السؤال ${m}.`;
+      const btn = document.getElementById("go1"); btn.disabled = true; err.textContent = "";
+      try{ const r = x.type==="text" ? await rpc("live_new_text",{p_question:x.q})
+                                     : await rpc("live_new_poll",{p_question:x.q,p_options:x.options,p_correct:x.correct});
+           location.href = `${TEACHER}?s=${r.code}&k=${r.key}`; }
+      catch(z){ err.textContent = "تعذّر إنشاء السؤال. حاول مرة أخرى."; btn.disabled = false; }
+    };
+  }
+
+  showLessons();
+}
+
+/* ================= صفحة الطالب الرئيسية: رمز الدخول فقط ================= */
+function studentHome(){
+  app.innerHTML = brand() + `
+  <form class="panel vote" id="joinf">
+    <h1 style="font-size:1.6rem">أهلاً بك</h1>
+    <div class="field"><label for="jc">١. اكتب الرمز الظاهر على شاشة المعلم</label>
+      <input type="text" id="jc" inputmode="numeric" maxlength="6" placeholder="482915" autocomplete="off"
+        style="direction:ltr;text-align:center;font-size:2rem;letter-spacing:.25em;padding:14px"></div>
+    <div class="field"><label for="jn">٢. اكتب اسمك</label>
+      <input type="text" id="jn" maxlength="60" autocomplete="name" placeholder="الاسم الأول واسم العائلة" style="font-size:1.2rem;padding:12px"></div>
+    <button class="primary" type="submit" style="padding:14px;font-size:1.15rem">دخول</button>
+    <span class="err" id="jerr"></span>
+  </form>`;
+  const jc=document.getElementById("jc"), jn=document.getElementById("jn"), err=document.getElementById("jerr");
+  jn.value=store("student_name")||""; jc.focus();
+  document.getElementById("joinf").onsubmit=e=>{ e.preventDefault();
+    const c=jc.value.replace(/[^\d٠-٩]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const n=jn.value.trim().replace(/\s+/g," ");
+    if(c.length!==6){ err.textContent="الرمز من ستة أرقام."; return jc.focus(); }
+    if(n.length<2){ err.textContent="اكتب اسمك حتى يعرف المعلم إجابتك."; return jn.focus(); }
+    store("student_name",n); store("joined_"+c,1);
+    location.href=`${STUDENT}?j=${c}`; };
+}
+
+/* ================= شاشة العرض للمعلم ================= */
+function presenter({joinCode, key, isSet}){
+  const joinUrl = `${STUDENT}?${isSet?"c":"v"}=${joinCode}`;
+  app.innerHTML = brand(`<div class="meta"><span class="step" id="stepl"></span><span class="kind" id="kind"></span><span class="status" id="st"><i></i><span>مفتوح</span></span></div>`) + `
+  <div class="stage">
+    <section class="panel">
+      <div class="hint" id="ttl"></div>
+      <h1 class="q" id="q">…</h1>
+      <div class="wait" id="wait" hidden><b id="wn">0</b><span>طالباً أجابوا حتى الآن</span>
+        <div class="chips wl" id="waitnames" hidden></div>
+        <button class="gold" id="reveal">أظهر الإجابة الصحيحة</button></div>
+      <div class="bars" id="bars"></div>
+      <div class="total" id="tot"></div>
+      <div class="names" id="names" hidden><h3 id="nh"></h3><div class="chips" id="nc"></div></div>
+      <div class="wall" id="wall" hidden>
+        <div class="walltools">
+          <span class="total" id="wn2"></span>
+          <div class="seg" role="group" aria-label="طريقة العرض">
+            <button type="button" data-view="cards" aria-pressed="true">بطاقات</button>
+            <button type="button" data-view="cloud" aria-pressed="false">سحابة كلمات</button>
+          </div>
+        </div>
+        <div id="wallbody"></div>
+      </div>
+      ${isSet?`<div class="nav"><button id="prev">السؤال السابق</button><button id="scores" class="ghost">ترتيب الطلاب</button><button class="primary" id="next">السؤال التالي</button></div>`:""}
+    </section>
+    <aside class="panel join">
+      <div class="hint">امسح الرمز أو ادخل بالرقم</div>
+      <div class="qrbox" id="qr"></div>
+      <div class="code">${joinCode}</div>
+      <div class="url" style="font-size:1rem">${esc(STUDENT.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
+      <label class="tgl namestgl"><input type="checkbox" id="shownames"> إظهار أسماء الطلاب</label>
+      <div class="controls">
+        <button id="tog">إيقاف</button>
+        <button id="rst">تصفير الإجابات</button>
+        <button id="fs">ملء الشاشة</button>
+      </div>
+    </aside>
+  </div>`;
+  try{ new QRCode(document.getElementById("qr"),{text:joinUrl,width:460,height:460,colorDark:"#5e0e26",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+
+  let pollCode = isSet ? null : joinCode, last=null, pos=0, count=1, builtFor=null, confirmReset=false, busy=false, timer=null;
+  const $=id=>document.getElementById(id);
+  const act=async a=>{ if(!pollCode||busy) return; busy=true; try{ await rpc("live_teacher_action",{p_code:pollCode,p_key:key,p_action:a}); }catch(e){} busy=false; tick(); };
+  $("tog").onclick=()=>act(last&&last.is_open?"close":"open");
+  $("reveal").onclick=()=>act("reveal");
+  $("rst").onclick=()=>{
+    if(!confirmReset){ confirmReset=true; $("rst").textContent="اضغط مرة أخرى للتأكيد"; setTimeout(()=>{confirmReset=false;$("rst").textContent="تصفير الإجابات"},3000); return; }
+    confirmReset=false; $("rst").textContent="تصفير الإجابات"; act("reset"); };
+  $("fs").onclick=()=>{ document.documentElement.requestFullscreen?.().catch(()=>{}); };
+  if(isSet){
+    const go=async d=>{ if(busy) return; const p=pos+d; if(p<0||p>=count) return; busy=true;
+      try{ await rpc("live_set_go",{p_code:joinCode,p_key:key,p_pos:p}); }catch(e){} busy=false; tick(); };
+    $("prev").onclick=()=>go(-1); $("next").onclick=()=>go(1);
+    $("scores").onclick=showScores;
+  }
+
+  /* ---- لوحة الإجابات المكتوبة ---- */
+  let answers=[], wallSig="", view=store("wall_view")||"cards", showNames=store("wall_names")!==false;
+  $("shownames").checked=showNames;
+  const setView=v=>{ view=v; store("wall_view",v); document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.view===v))); drawWall(); };
+  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+  $("shownames").onchange=e=>{ showNames=e.target.checked; store("wall_names",showNames); drawWall(); tick(); };
+  setView(view);
+  $("wallbody").onclick=async e=>{
+    const b=e.target.closest("button[data-m]"); if(!b) return;
+    const card=b.closest("[data-id]"), id=card.dataset.id, a=answers.find(x=>x.id===id); if(!a) return;
+    const before=a.mark, next=(a.mark===b.dataset.m)?null:b.dataset.m;
+    a.mark=next; drawWall();
+    let ok=false; try{ ok=await rpc("live_mark",{p_code:pollCode,p_key:key,p_id:id,p_mark:next}); }catch(x){}
+    if(!ok){ a.mark=before; drawWall(); }
+  };
+  function cloudKey(t){ return t.toLowerCase().replace(/[ً-ْـ]/g,"").replace(/[إأآ]/g,"ا").replace(/ى/g,"ي")
+    .replace(/[.,،؛;:!?؟"'«»()\-]/g," ").replace(/\s+/g," ").trim(); }
+  function drawWall(){
+    const sig=JSON.stringify([view,showNames,answers]); if(sig===wallSig) return; wallSig=sig;
+    $("wn2").textContent = answers.length ? `${answers.length} إجابة` : "";
+    const body=$("wallbody");
+    if(!answers.length){ body.innerHTML=`<div class="wait"><span>بانتظار أول إجابة. تظهر إجابات الطلاب هنا فور إرسالها.</span></div>`; return; }
+    if(view==="cloud"){
+      const groups=new Map();
+      answers.forEach(a=>{ const k=cloudKey(a.text); if(!k) return; const g=groups.get(k)||{text:a.text,n:0}; g.n++; groups.set(k,g); });
+      const list=[...groups.values()].sort((x,y)=>y.n-x.n), max=list[0]?list[0].n:1;
+      body.innerHTML=`<div class="cloud">${list.map((g,i)=>{
+        let size = max>1 ? 1.1 + 2.4*(g.n-1)/(max-1) : 1.7;
+        if(g.text.length>40) size=Math.min(size,1.05); else if(g.text.length>20) size=Math.min(size,1.5);
+        return `<span class="w c${i%4}" style="font-size:${size.toFixed(2)}rem" title="${g.n} ${g.n>1?"طلاب":"طالب"}">${esc(g.text)}${g.n>1?`<sup>${g.n}</sup>`:""}</span>`; }).join("")}</div>`;
+      return;
+    }
+    const MK=[["ok","✓","صحيحة"],["no","✗","غير صحيحة"],["⭐","⭐","ممتازة"],["👏","👏","أحسنت"],["💡","💡","فكرة جميلة"],["❤️","❤️","أعجبتني"],["🤔","🤔","تحتاج تفكيراً"]];
+    const cls=m=>m==="ok"?"ok":m==="no"?"no":m?"emo":"none";
+    body.innerHTML=`<div class="cards">${answers.slice().reverse().map(a=>`
+      <div class="acard m-${cls(a.mark)}" data-id="${esc(a.id)}">
+        <p class="atext">${esc(a.text)}</p>
+        ${showNames?`<span class="aname">${esc(a.name)}</span>`:""}
+        <div class="marks">${MK.map(([m,ic,lb])=>`<button type="button" data-m="${m}" aria-pressed="${a.mark===m}" aria-label="${lb}" title="${lb}" class="${m==="ok"?"mk-ok":m==="no"?"mk-no":""}">${ic}</button>`).join("")}</div>
+      </div>`).join("")}</div>`;
+  }
+
+  async function showScores(){
+    const ov=document.createElement("div"); ov.className="overlay";
+    ov.innerHTML=`<div class="panel" role="dialog" aria-label="ترتيب الطلاب"><div class="row" style="justify-content:space-between"><h2>ترتيب الطلاب</h2><button id="xclose">إغلاق</button></div><div id="sb"><p class="hint">جارٍ التحميل…</p></div></div>`;
+    document.body.appendChild(ov);
+    const close=()=>ov.remove(); ov.querySelector("#xclose").onclick=close; ov.onclick=e=>{ if(e.target===ov) close(); };
+    let rows=[]; try{ rows=await rpc("live_set_scores",{p_code:joinCode,p_key:key})||[]; }catch(e){}
+    ov.querySelector("#sb").innerHTML = rows.length
+      ? `<div style="overflow-x:auto"><table class="board"><tr><th>#</th><th>الاسم</th><th>إجابات صحيحة</th><th>أجاب عن</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${r.correct}</td><td>${r.answered}</td></tr>`).join("")}</table></div><p class="hint">يُحتسب ما أظهرت إجابته الصحيحة من الأسئلة، والإجابات المكتوبة التي قيّمتها بـ ✓ أو ✗.</p>`
+      : `<p class="hint">لا توجد نتائج بعد. يظهر الترتيب بعد إظهار الإجابة الصحيحة لسؤال، أو بعد تقييم إجابات مكتوبة بـ ✓ أو ✗.</p>`;
+  }
+
+  async function render(s){
+    last=s;
+    if(s.mode==="text"){
+      $("kind").textContent="إجابة مكتوبة";
+      const st=$("st"); st.classList.toggle("closed",!s.is_open);
+      st.querySelector("span").textContent=s.is_open?"مفتوح للإجابة":"مغلق";
+      $("tog").textContent=s.is_open?"إيقاف":"إعادة فتح";
+      const q=$("q"); if(q.textContent!==s.question) q.textContent=s.question;
+      $("wait").hidden=true; $("bars").hidden=true; $("tot").hidden=true; $("names").hidden=true; $("wall").hidden=false;
+      if(builtFor!==pollCode){ builtFor=pollCode; answers=[]; wallSig=""; $("bars").innerHTML=""; }
+      let ans=null; try{ ans=await rpc("live_poll_answers",{p_code:pollCode,p_key:key}); }catch(e){}
+      if(ans){
+        // نحافظ على تقييم قيد الإرسال إن وُجد
+        answers=ans; drawWall();
+      }
+      return;
+    }
+    $("wall").hidden=true;
+    const quiz=s.mode==="quiz", hide=quiz&&!s.revealed;
+    $("kind").textContent=quiz?"له إجابة صحيحة":"تصويت رأي";
+    const st=$("st"), opened=s.is_open&&!s.revealed; st.classList.toggle("closed",!opened);
+    st.querySelector("span").textContent= s.revealed?"ظهرت الإجابة": opened?"مفتوح للإجابة":"مغلق";
+    $("tog").textContent= opened?"إيقاف":"إعادة فتح";
+    const q=$("q"); if(q.textContent!==s.question) q.textContent=s.question;
+    $("wait").hidden=!hide; $("wn").textContent=s.total;
+    const bars=$("bars"); bars.hidden=hide; $("tot").hidden=hide;
+    if(builtFor!==pollCode){ bars.innerHTML=s.options.map((o,i)=>`<div class="bar" id="b${i}"><div class="name">${LETTERS[i]}. ${esc(o)}</div><div class="num"><span>0</span><small>0٪</small></div><div class="track"><div class="fill"></div></div></div>`).join(""); builtFor=pollCode; $("names").hidden=true; }
+    if(!hide && s.counts){
+      const max=Math.max(...s.counts);
+      s.counts.forEach((c,i)=>{ const el=$("b"+i); if(!el) return; const pct=s.total?Math.round(c*100/s.total):0;
+        el.querySelector(".num span").textContent=c; el.querySelector(".num small").textContent=pct+"٪";
+        el.querySelector(".fill").style.width=(s.total?c*100/s.total:0)+"%";
+        el.classList.toggle("correct", quiz && i===s.correct);
+        el.classList.toggle("dim", quiz && i!==s.correct);
+        el.classList.toggle("lead", !quiz && c>0 && c===max); });
+      $("tot").textContent = s.total ? `عدد المشاركين: ${s.total}` : "بانتظار أول إجابة…";
+    }
+    // من أجاب؟ الأسماء تحت كل خيار، أو قائمة من أجاب قبل إظهار الإجابة
+    let ans=null;
+    if(s.total && (showNames || (quiz && s.revealed))){ try{ ans=await rpc("live_poll_answers",{p_code:pollCode,p_key:key}); }catch(e){} }
+    const chips=list=>list.map(n=>`<span>${esc(n)}</span>`).join("");
+    const setHTML=(el,html)=>{ if(el.innerHTML!==html) el.innerHTML=html; el.hidden=!html; };
+    s.options.forEach((o,i)=>{ const el=$("b"+i); if(!el) return;
+      let wl=el.querySelector(".wl"); if(!wl){ wl=document.createElement("div"); wl.className="chips wl"; el.appendChild(wl); }
+      setHTML(wl, (showNames && !hide && ans) ? chips(ans.filter(a=>a.idx===i).map(a=>a.name)) : ""); });
+    setHTML($("waitnames"), (showNames && hide && ans) ? chips(ans.map(a=>a.name)) : "");
+    if(quiz && s.revealed && ans){
+      const right=ans.filter(a=>a.idx===s.correct).length;
+      $("names").hidden=false; $("nh").textContent=`أجاب إجابة صحيحة ${right} من ${ans.length}`; $("nc").innerHTML="";
+    } else $("names").hidden=true;
+  }
+  async function tick(){
+    try{
+      if(isSet){
+        const r=await rpc("live_set_state",{p_code:joinCode});
+        if(!r){ notFound(); return; }
+        pollCode=r.poll_code; pos=r.pos; count=r.count;
+        $("ttl").textContent=r.title;
+        $("stepl").textContent=`السؤال ${pos+1} من ${count}`;
+        $("prev").disabled=pos<=0; $("next").disabled=pos>=count-1;
+        if(r.state) await render(r.state);
+      } else {
+        const s=await rpc("live_poll_state",{p_code:joinCode});
+        if(!s){ notFound(); return; } await render(s);
+      }
+    }catch(e){}
+  }
+  function notFound(){ app.querySelector(".stage").innerHTML=`<div class="panel"><p class="err">لم يُعثر على هذا الرابط. تأكد منه أو أنشئ سؤالاً جديداً.</p></div>`; clearInterval(timer); }
+  tick(); timer=setInterval(()=>{ if(!document.hidden) tick(); },1500);
+}
+
+/* ================= شاشة الطالب ================= */
+function voterId(){
+  let id=store("voter_id");
+  if(!id){ id=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36)); store("voter_id",id); }
+  return id;
+}
+function askName(then){
+  app.innerHTML=brand()+`<form class="panel vote" id="nf"><h1 style="font-size:1.5rem">اكتب اسمك</h1>
+    <p class="hint">حتى يعرف المعلم إجابتك.</p>
+    <div class="field"><label for="nm">الاسم</label><input type="text" id="nm" maxlength="60" autocomplete="name" placeholder="الاسم الأول واسم العائلة" style="font-size:1.2rem;padding:12px"></div>
+    <button class="primary" type="submit" style="padding:14px;font-size:1.15rem">دخول</button><span class="err" id="nerr"></span></form>`;
+  const nm=document.getElementById("nm"); nm.value=store("student_name")||""; nm.focus();
+  document.getElementById("nf").onsubmit=e=>{ e.preventDefault(); const v=nm.value.trim().replace(/\s+/g," ");
+    if(v.length<2) return document.getElementById("nerr").textContent="اكتب اسمك (حرفان على الأقل).";
+    store("student_name",v); then(); };
+}
+function student({code, isSet}){
+  const name=store("student_name");
+  // الاسم مطلوب عند أول دخول لكل حصة (يُملأ تلقائياً بالاسم السابق)
+  if(!name || !store("joined_"+code)) return askName(()=>{ store("joined_"+code,1); student({code,isSet}); });
+  let shown=null, mine=null, myAns=null, timer=null;
+  const fail=()=>{ app.innerHTML=brand()+`<div class="panel vote"><p class="err">الرمز ${esc(code)} غير صحيح. تأكد منه من شاشة المعلم.</p><a href="${base()}">إدخال رمز آخر</a></div>`; clearInterval(timer); };
+  const lock=()=>document.querySelectorAll(".choice").forEach(c=>{ c.disabled=true; c.setAttribute("aria-pressed",String(+c.dataset.i===mine)); });
+
+  function status(s){
+    const msg=document.getElementById("msg"); if(!msg) return;
+    document.querySelectorAll(".choice").forEach(c=>c.classList.toggle("is-correct", s.mode==="quiz"&&s.revealed&&+c.dataset.i===s.correct));
+    if(s.mode==="quiz" && s.revealed){
+      if(mine===null) msg.innerHTML=`<div class="res bad">لم تُجب عن هذا السؤال. الإجابة الصحيحة: ${esc(s.options[s.correct])}</div>`;
+      else if(mine===s.correct) msg.innerHTML=`<div class="res good">✓ إجابتك صحيحة</div>`;
+      else msg.innerHTML=`<div class="res bad">✗ إجابتك غير صحيحة. الإجابة الصحيحة: ${esc(s.options[s.correct])}</div>`;
+      lock(); return;
+    }
+    if(mine!==null){ msg.innerHTML=`<div class="done">تم إرسال إجابتك ✓${isSet?" سيظهر السؤال التالي هنا تلقائياً.":""}</div>`; lock(); return; }
+    if(!s.is_open){ msg.innerHTML=`<p class="err">الإجابة مغلقة الآن.</p>`; lock(); return; }
+    msg.innerHTML=`<p class="hint">اختر إجابة واحدة. لا يمكن تغييرها بعد الإرسال.</p>`;
+    document.querySelectorAll(".choice").forEach(c=>c.disabled=false);
+  }
+  async function draw(pollCode, s, header){
+    shown=pollCode; mine=null;
+    try{ mine=await rpc("live_my_vote",{p_code:pollCode,p_voter:voterId()}); }catch(e){}
+    app.innerHTML=brand()+`<section class="panel vote">
+      <div class="who"><span>باسم: <b>${esc(name)}</b></span><button class="ghost" id="chn">تغيير الاسم</button></div>
+      ${header?`<div class="hint">${esc(header)}</div>`:""}
+      <h1 style="font-size:1.6rem">${esc(s.question)}</h1>
+      <div class="choices" id="ch">${s.options.map((o,i)=>`<button class="choice" data-i="${i}" aria-pressed="false"><span class="k">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <div id="msg"></div></section>`;
+    document.getElementById("chn").onclick=()=>{ clearInterval(timer); askName(()=>student({code,isSet})); };
+    status(s);
+    document.getElementById("ch").onclick=async e=>{
+      const b=e.target.closest(".choice"); if(!b||b.disabled||mine!==null) return; const i=+b.dataset.i;
+      document.querySelectorAll(".choice").forEach(c=>c.disabled=true);
+      let r=null; try{ r=await rpc("live_answer",{p_code:pollCode,p_voter:voterId(),p_name:name,p_idx:i}); }catch(x){}
+      if(r==="ok"){ mine=i; }
+      else if(r==="already"){ try{ mine=await rpc("live_my_vote",{p_code:pollCode,p_voter:voterId()}); }catch(x){} }
+      else { const msg=document.getElementById("msg");
+        msg.innerHTML=`<p class="err">${r==="closed"?"الإجابة مغلقة الآن.":"لم تُرسَل الإجابة. تحقق من الاتصال وحاول مرة أخرى."}</p>`;
+        if(r!=="closed") document.querySelectorAll(".choice").forEach(c=>c.disabled=false); return; }
+      status(s); };
+  }
+  /* ---- سؤال بإجابة مكتوبة ---- */
+  function markMsg(m){
+    if(m==="ok") return `<div class="res good">✓ أحسنت! قيّم المعلم إجابتك صحيحة</div>`;
+    if(m==="no") return `<div class="res bad">✗ قيّم المعلم إجابتك غير صحيحة</div>`;
+    if(m) return `<div class="res emo">تفاعل المعلم مع إجابتك <span class="bigemo">${esc(m)}</span></div>`;
+    return "";
+  }
+  function statusText(s){
+    const msg=document.getElementById("msg"), tf=document.getElementById("tf"); if(!msg||!tf) return;
+    if(myAns){
+      tf.hidden=true;
+      msg.innerHTML=`<div class="done"><small>إجابتك:</small><p class="mytext">${esc(myAns.text)}</p></div>${markMsg(myAns.mark)}${isSet?`<p class="hint">سيظهر السؤال التالي هنا تلقائياً.</p>`:""}`;
+      return;
+    }
+    if(!s.is_open){ tf.hidden=true; msg.innerHTML=`<p class="err">الإجابة مغلقة الآن.</p>`; return; }
+    tf.hidden=false; if(msg.dataset.keep!=="1") msg.innerHTML="";
+  }
+  async function drawText(pollCode, s, header){
+    shown=pollCode; myAns=null;
+    try{ myAns=await rpc("live_my_answer",{p_code:pollCode,p_voter:voterId()}); }catch(e){}
+    app.innerHTML=brand()+`<section class="panel vote">
+      <div class="who"><span>باسم: <b>${esc(name)}</b></span><button class="ghost" id="chn">تغيير الاسم</button></div>
+      ${header?`<div class="hint">${esc(header)}</div>`:""}
+      <h1 style="font-size:1.6rem">${esc(s.question)}</h1>
+      <form id="tf" class="tform">
+        <label for="ta">اكتب إجابتك أو مشاركتك</label>
+        <textarea id="ta" maxlength="280" rows="3"></textarea>
+        <div class="row" style="justify-content:space-between"><small class="hint" id="cnt">0 / 280</small>
+          <button class="primary" type="submit" id="tsend">أرسل</button></div>
+        <p class="hint">إجابة واحدة فقط، ولا يمكن تعديلها بعد الإرسال.</p>
+      </form>
+      <div id="msg"></div></section>`;
+    document.getElementById("chn").onclick=()=>{ clearInterval(timer); askName(()=>student({code,isSet})); };
+    const ta=document.getElementById("ta"), cnt=document.getElementById("cnt"), msg=document.getElementById("msg");
+    ta.oninput=()=>{ cnt.textContent=`${ta.value.length} / 280`; };
+    document.getElementById("tf").onsubmit=async e=>{
+      e.preventDefault();
+      const t=ta.value.trim(); if(!t){ msg.innerHTML=`<p class="err">اكتب إجابتك أولاً.</p>`; msg.dataset.keep="1"; return; }
+      const btn=document.getElementById("tsend"); btn.disabled=true; msg.dataset.keep="";
+      let r=null; try{ r=await rpc("live_answer_text",{p_code:pollCode,p_voter:voterId(),p_name:name,p_text:t}); }catch(x){}
+      if(r==="ok"||r==="already"){ try{ myAns=await rpc("live_my_answer",{p_code:pollCode,p_voter:voterId()}); }catch(x){ myAns={text:t,mark:null}; } statusText(s); return; }
+      btn.disabled=false; msg.dataset.keep="1";
+      msg.innerHTML=`<p class="err">${r==="closed"?"الإجابة مغلقة الآن.":"لم تُرسَل الإجابة. تحقق من الاتصال وحاول مرة أخرى."}</p>`;
+    };
+    statusText(s);
+  }
+
+  async function tick(){
+    try{
+      let pc, s, header;
+      if(isSet){ const r=await rpc("live_set_state",{p_code:code}); if(!r||!r.state) return fail();
+        pc=r.poll_code; s=r.state; header=`${r.title} · السؤال ${r.pos+1} من ${r.count}`; }
+      else { s=await rpc("live_poll_state",{p_code:code}); if(!s) return fail(); pc=code; }
+      if(pc!==shown) await (s.mode==="text" ? drawText(pc, s, header) : draw(pc, s, header));
+      else if(s.mode==="text"){
+        if(myAns){ try{ myAns=await rpc("live_my_answer",{p_code:pc,p_voter:voterId()}); }catch(e){} }
+        if(!myAns){ const b=document.getElementById("tsend"); if(b) b.disabled=false; }
+        statusText(s);
+      }
+      else {
+        if(mine!==null && !s.revealed){ try{ mine=await rpc("live_my_vote",{p_code:pc,p_voter:voterId()}); }catch(e){} }
+        status(s); }
+    }catch(e){}
+  }
+  tick(); timer=setInterval(()=>{ if(!document.hidden) tick(); },2000);
+}
+
+/* رمز مكتوب يدوياً: قد يكون لحصة أو لسؤال منفرد */
+async function joinByCode(code){
+  try{ const r=await rpc("live_set_state",{p_code:code}); if(r){ location.replace(`${base()}?c=${code}`); return; } }catch(e){}
+  location.replace(`${base()}?v=${code}`);
+}
+
+const digits=v=>(v||"").replace(/\D/g,"");
+const P={s:params.get("s"),c:params.get("c"),k:params.get("k"),v:params.get("v"),j:params.get("j")};
+if(IS_TEACHER){
+  if(P.c && P.k) presenter({joinCode:digits(P.c), key:P.k, isSet:true});
+  else if(P.s && P.k) presenter({joinCode:digits(P.s), key:P.k, isSet:false});
+  else teacherGate(home);
+} else {
+  if(P.k) location.replace(TEACHER + location.search);   // روابط المعلم القديمة
+  else if(P.c) student({code:digits(P.c), isSet:true});
+  else if(P.v) student({code:digits(P.v), isSet:false});
+  else if(P.j) joinByCode(digits(P.j));
+  else studentHome();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>قرعة الصف بالكاميرا</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap">
+<style>
+/* Layout: a dark "stage" (the camera picture) with a spotlight that lands on one face; controls beside it, stacking under it on phones */
+:root {
+  --bg: #eef1f7;
+  --surface: #ffffff;
+  --fg: #172036;
+  --muted: #5b6680;
+  --line: #d5dbe8;
+  --stage: #0f1526;
+  --stage-fg: #e9edf7;
+  --spot: #ffc83d;
+  --spot-ink: #2a1d00;
+  --accent: #2f5bea;
+  --ok: #1f9d63;
+  --warn: #c2410c;
+  --f-display: "Lalezar", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", system-ui, "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1020; --surface: #141b30; --fg: #e8ecf6; --muted: #9aa5c2; --line: #263152;
+    --stage: #05080f; --accent: #7d9bff; --ok: #3fcf8e; --warn: #fb923c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1020; --surface: #141b30; --fg: #e8ecf6; --muted: #9aa5c2; --line: #263152;
+  --stage: #05080f; --accent: #7d9bff; --ok: #3fcf8e; --warn: #fb923c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 28px;
+}
+.wrap { max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.sub { margin: 4px 0 0; color: var(--muted); }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.stage {
+  position: relative; background: var(--stage); color: var(--stage-fg); border-radius: 18px; overflow: hidden;
+  aspect-ratio: 16 / 10; max-width: 100%; display: grid; place-items: center;
+}
+.stage canvas { width: 100%; height: 100%; display: block; object-fit: contain; }
+.stage video.feed { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; inset-inline-start: 0; top: 0; }
+@media (max-width: 600px) { .stage { aspect-ratio: 3 / 4; } }
+.stage:fullscreen { border-radius: 0; aspect-ratio: auto; width: 100vw; height: 100vh; }
+.empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; }
+.empty-inner { max-width: 440px; display: grid; gap: 14px; justify-items: center; }
+.lens { width: 84px; height: 84px; border-radius: 50%; border: 3px dashed var(--spot); display: grid; place-items: center; }
+.lens svg { width: 40px; height: 40px; }
+.empty h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 0; color: var(--spot); }
+.empty p { margin: 0; color: #b9c2da; }
+.empty .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+.badge {
+  position: absolute; top: 12px; inset-inline-start: 12px; background: rgba(5, 8, 15, .72); color: var(--stage-fg);
+  padding: 4px 12px; border-radius: 999px; font-size: 14px; font-variant-numeric: tabular-nums; display: flex; gap: 8px; align-items: center;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+.dot.live { background: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, .25); }
+.stage-tools { position: absolute; top: 10px; inset-inline-end: 10px; display: flex; gap: 6px; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 10px; border: 0; background: rgba(5, 8, 15, .72); color: var(--stage-fg);
+  display: grid; place-items: center; cursor: pointer;
+}
+.icon-btn svg { width: 20px; height: 20px; }
+.by { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 3px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.by b { color: var(--fg); }
+#fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.banner .phrase { display: block; animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.winner .phrase { font-family: var(--f-display); font-size: 28px; line-height: 1.25; color: var(--accent); animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); text-wrap: balance; }
+@media (prefers-reduced-motion: reduce) { .banner .phrase, .winner .phrase { animation: none; } }
+.banner {
+  position: absolute; inset-inline: 0; bottom: 0; padding: 14px 18px; text-align: center;
+  background: linear-gradient(transparent, rgba(5, 8, 15, .9)); font-family: var(--f-display); font-size: clamp(22px, 3.4vw, 34px); color: var(--spot);
+}
+
+aside { display: grid; gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.panel h3 { margin: 0; font-size: 13px; letter-spacing: .02em; color: var(--muted); font-weight: 500; }
+button.btn {
+  font: inherit; font-weight: 700; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+  padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+button.btn:hover { border-color: var(--accent); }
+button.btn:disabled { opacity: .5; cursor: not-allowed; }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.empty button.btn { background: #1c2440; border-color: #34406a; color: var(--stage-fg); }
+.empty button.btn.primary { background: var(--spot); border-color: var(--spot); color: var(--spot-ink); }
+button:focus-visible, select:focus-visible, label.switch input:focus-visible + .track { outline: 3px solid var(--spot); outline-offset: 2px; }
+.pick {
+  font-family: var(--f-display); font-weight: 400; font-size: 30px; width: 100%; padding: 14px; border-radius: 16px; border: 0;
+  background: var(--spot); color: var(--spot-ink); cursor: pointer; box-shadow: 0 6px 0 #c99410;
+  transition: transform .08s, box-shadow .08s;
+}
+.pick:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 #c99410; }
+.pick:disabled { opacity: .45; cursor: not-allowed; box-shadow: 0 6px 0 #8a7a50; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+select { font: inherit; width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.status { font-size: 14px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+.status.err { color: var(--warn); }
+.status.ok { color: var(--ok); }
+.count { font-family: var(--f-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+.count small { font-family: var(--f-body); font-size: 14px; color: var(--muted); margin-inline-start: 6px; }
+
+.winner { display: grid; gap: 8px; justify-items: center; text-align: center; }
+.winner canvas { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--spot); background: var(--stage); }
+.winner b { font-family: var(--f-display); font-weight: 400; font-size: 24px; }
+.history { display: flex; gap: 6px; flex-wrap: wrap; }
+.history canvas { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--line); }
+label.switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; font-size: 14px; }
+label.switch input { position: absolute; opacity: 0; }
+label.switch .track { width: 42px; height: 24px; border-radius: 999px; background: var(--line); position: relative; flex: none; transition: background .15s; }
+label.switch .track::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: inset-inline-start .15s; }
+label.switch input:checked + .track { background: var(--accent); }
+label.switch input:checked + .track::after { inset-inline-start: 21px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+@media (prefers-reduced-motion: reduce) { .pick { transition: none; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <div>
+      <h1>قرعة الصف <span>بالكاميرا</span></h1>
+      <p class="sub">وجّه الكاميرا نحو الطلاب، واضغط «اختر طالباً» ليقع الضوء على وجه واحد عشوائياً.</p>
+      <p class="by">إعداد: <b>التعليم الممتع</b></p>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="stage" id="stage" aria-label="صورة الصف">
+      <canvas id="view" width="1280" height="800"></canvas>
+      <div class="empty" id="empty">
+        <div class="empty-inner">
+          <div class="lens" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffc83d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <h2>جاهز لاختيار طالب؟</h2>
+          <p id="emptyMsg">شغّل الكاميرا المباشرة، أو التقط صورة للصف من الهاتف أو اختر صورة محفوظة.</p>
+          <div class="row">
+            <button class="btn primary" id="startCam" type="button">تشغيل الكاميرا</button>
+            <button class="btn" id="snapBtn" type="button">التقاط صورة</button>
+            <button class="btn" id="fileBtn" type="button">اختيار صورة</button>
+          </div>
+        </div>
+      </div>
+      <div class="badge" id="badge" hidden><i class="dot" id="dot"></i><span id="badgeText"></span></div>
+      <div class="stage-tools">
+        <button class="icon-btn" id="fsBtn" type="button" title="ملء الشاشة" aria-label="ملء الشاشة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+      </div>
+      <canvas id="fx" aria-hidden="true"></canvas>
+      <div class="banner" id="banner" hidden></div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <button class="pick" id="pickBtn" type="button" disabled>اختر طالباً</button>
+        <div class="count" aria-live="polite"><span id="faceCount">0</span><small>وجه ظاهر الآن</small></div>
+        <div class="status" id="status">جارٍ تحميل نموذج كشف الوجوه…</div>
+      </div>
+
+      <div class="panel winner" id="winnerPanel" hidden>
+        <h3>الطالب المختار</h3>
+        <canvas id="winnerCanvas" width="300" height="300"></canvas>
+        <div class="phrase" id="phrase">دورك الآن!</div>
+        <button class="btn" id="againBtn" type="button">رجوع للكاميرا</button>
+      </div>
+
+      <div class="panel">
+        <h3>المصدر</h3>
+        <div class="btn-row">
+          <button class="btn" id="startCam2" type="button">الكاميرا</button>
+          <button class="btn" id="fileBtn2" type="button">صورة</button>
+        </div>
+        <select id="camSelect" aria-label="اختر الكاميرا" hidden></select>
+        <label class="switch"><span class="lbl">عكس الصورة كالمرآة</span><input type="checkbox" id="mirror" checked><span class="track"></span></label>
+        <label class="switch"><span class="lbl">تصفيق وهتاف</span><input type="checkbox" id="sound" checked><span class="track"></span></label>
+      </div>
+
+      <div class="panel" id="historyPanel" hidden>
+        <h3>اختيارات هذه الحصة</h3>
+        <div class="history" id="history"></div>
+      </div>
+
+      <p class="hint">الصور تبقى على جهازك ولا تُرفع إلى أي مكان. للحصول على أفضل كشف، اجعل الوجوه واضحة ومضاءة جيداً.</p>
+    </aside>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <input type="file" id="snapInput" accept="image/*" capture="environment" hidden>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const view = $('view'), ctx = view.getContext('2d');
+  const work = document.createElement('canvas'), wctx = work.getContext('2d', { willReadFrequently: true });
+  const video = document.createElement('video');
+  video.muted = true; video.playsInline = true; video.autoplay = true;
+  video.setAttribute('playsinline', ''); video.setAttribute('muted', ''); video.setAttribute('autoplay', '');
+  video.className = 'feed'; $('stage').appendChild(video);   // iOS Safari only plays a video that is in the page
+  const isPhone = matchMedia('(pointer: coarse)').matches;
+  if (isPhone) $('mirror').checked = false;
+
+  const S = {
+    ready: false, source: null,          // 'cam' | 'img'
+    stream: null, img: null,
+    faces: [], frozen: null,             // frozen: canvas snapshot during/after a pick
+    highlight: -1, winner: -1, spinning: false,
+    detecting: false, lastDetect: 0,
+    best: false,                         // true once the more accurate detector has loaded
+  };
+  const LIB = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13';
+
+  const setStatus = (text, kind) => { const s = $('status'); s.textContent = text; s.className = 'status' + (kind ? ' ' + kind : ''); };
+  const updatePick = () => {
+    $('pickBtn').disabled = !S.ready || S.spinning || !S.source || S.faces.length === 0;
+    $('faceCount').textContent = S.faces.length;
+  };
+
+  // ---------- model ----------
+  // The library loads after the page is usable, so the camera can start while it downloads.
+  // A small, fast detector comes first and drives the live boxes; the accurate one follows for the pick itself.
+  function loadLib() {
+    return new Promise((res, rej) => {
+      if (typeof faceapi !== 'undefined') return res();
+      const sc = document.createElement('script'); sc.src = LIB + '/dist/face-api.js'; sc.async = true;
+      sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
+    });
+  }
+  async function loadNet(net) {
+    for (const b of ['./model', LIB + '/model']) { try { await net.loadFromUri(b); return true; } catch (e) {} }
+    return false;
+  }
+  async function loadModel() {
+    try { await loadLib(); } catch (e) { setStatus('تعذّر تحميل مكتبة كشف الوجوه. تأكد من الاتصال بالإنترنت ثم أعد فتح الصفحة.', 'err'); return; }
+    let gl = false;
+    try { gl = await faceapi.tf.setBackend('webgl'); } catch (e) {}
+    if (!gl) await faceapi.tf.setBackend('cpu');
+    await faceapi.tf.ready();
+    if (!await loadNet(faceapi.nets.tinyFaceDetector)) { setStatus('تعذّر تحميل نموذج كشف الوجوه. أعد فتح الصفحة.', 'err'); return; }
+    // warm up: the first run compiles the graphics shaders, which can freeze a tablet for a moment
+    try { const c = document.createElement('canvas'); c.width = c.height = 160; await faceapi.detectAllFaces(c, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 })); } catch (e) {}
+    S.ready = true;
+    setStatus(S.source === 'cam' ? 'الكاميرا تعمل. الوجوه المحاطة بإطار جاهزة للقرعة.' : (S.source ? 'جاهز.' : 'جاهز. ابدأ بتشغيل الكاميرا أو اختيار صورة.'), 'ok');
+    if (S.source === 'img') detectOnce();
+    updatePick();
+    S.best = await loadNet(faceapi.nets.ssdMobilenetv1);
+    if (S.best) { try { const c = document.createElement('canvas'); c.width = c.height = 160; await detectOn(c, true); } catch (e) {} }
+  }
+
+  // live: fast detector on a smaller copy of the frame; accurate: the full detector on the full frame
+  async function detectOn(canvas, accurate) {
+    let src = canvas, k = 1;
+    if (!accurate && canvas.width > 640) {
+      k = canvas.width / 640;
+      src = document.createElement('canvas'); src.width = 640; src.height = Math.round(canvas.height / k);
+      src.getContext('2d').drawImage(canvas, 0, 0, src.width, src.height);
+    }
+    const opts = accurate && S.best
+      ? new faceapi.SsdMobilenetv1Options({ minConfidence: 0.35, maxResults: 80 })
+      : new faceapi.TinyFaceDetectorOptions({ inputSize: accurate ? 608 : 416, scoreThreshold: 0.4 });
+    const res = await faceapi.detectAllFaces(src, opts);
+    return res.map(d => d.box).map(b => ({ x: b.x * k, y: b.y * k, w: b.width * k, h: b.height * k }))
+      .sort((a, b) => (a.y - b.y) || (a.x - b.x));
+  }
+
+  // ---------- source frame -> work canvas ----------
+  function grabFrame() {
+    let w, h, src;
+    if (S.source === 'cam') { src = video; w = video.videoWidth; h = video.videoHeight; }
+    else if (S.source === 'img') { src = S.img; w = S.img.naturalWidth; h = S.img.naturalHeight; }
+    if (!src || !w) return false;
+    const scale = Math.min(1, 1280 / Math.max(w, h));
+    const cw = Math.round(w * scale), ch = Math.round(h * scale);
+    if (work.width !== cw || work.height !== ch) { work.width = cw; work.height = ch; }
+    wctx.save();
+    if (S.source === 'cam' && $('mirror').checked) { wctx.translate(cw, 0); wctx.scale(-1, 1); }
+    wctx.drawImage(src, 0, 0, cw, ch);
+    wctx.restore();
+    return true;
+  }
+
+  // ---------- drawing ----------
+  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, r) : c.rect(x, y, w, h); }
+  function draw() {
+    const src = S.frozen || work;
+    if (!src.width) return;
+    if (view.width !== src.width || view.height !== src.height) { view.width = src.width; view.height = src.height; }
+    ctx.drawImage(src, 0, 0);
+    const lw = Math.max(2, view.width / 400);
+    const showWinner = S.winner >= 0 && !S.spinning;
+    if (showWinner) {
+      const f = S.faces[S.winner];
+      const cx = f.x + f.w / 2, cy = f.y + f.h / 2, r = Math.max(f.w, f.h) * 0.95;
+      ctx.save();
+      ctx.fillStyle = 'rgba(5,8,15,0.72)';
+      ctx.beginPath(); ctx.rect(0, 0, view.width, view.height); ctx.arc(cx, cy, r, 0, Math.PI * 2, true); ctx.fill('evenodd');
+      const g = ctx.createRadialGradient(cx, cy, r * 0.7, cx, cy, r * 1.15);
+      g.addColorStop(0, 'rgba(255,200,61,0)'); g.addColorStop(0.6, 'rgba(255,200,61,0.9)'); g.addColorStop(1, 'rgba(255,200,61,0)');
+      ctx.strokeStyle = g; ctx.lineWidth = r * 0.12; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#ffc83d'; ctx.lineWidth = lw * 2.2; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+    S.faces.forEach((f, i) => {
+      const on = i === S.highlight;
+      ctx.save();
+      if (S.spinning && !on) ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = on ? '#ffc83d' : 'rgba(233,237,247,0.85)';
+      ctx.lineWidth = on ? lw * 2.5 : lw;
+      const pad = on ? f.w * 0.12 : f.w * 0.05;
+      roundRect(ctx, f.x - pad, f.y - pad, f.w + pad * 2, f.h + pad * 2, f.w * 0.18); ctx.stroke();
+      if (on) { ctx.fillStyle = 'rgba(255,200,61,0.18)'; ctx.fill(); }
+      ctx.restore();
+    });
+  }
+
+  // ---------- live loop ----------
+  async function liveLoop() {
+    if (S.source !== 'cam') return;
+    if (!S.frozen && grabFrame()) {
+      const now = performance.now();
+      if (S.ready && !S.detecting && now - S.lastDetect > (S.gap || 250)) {
+        S.detecting = true; S.lastDetect = now;
+        const snap = document.createElement('canvas'); snap.width = work.width; snap.height = work.height;
+        snap.getContext('2d').drawImage(work, 0, 0);
+        detectOn(snap).then(f => { if (!S.frozen && S.source === 'cam') { S.faces = f; updatePick(); } })
+          .catch(() => {}).finally(() => { S.detecting = false; S.gap = Math.max(250, 2 * (performance.now() - now)); });
+      }
+      draw();
+    }
+    requestAnimationFrame(liveLoop);
+  }
+
+  async function detectOnce() {
+    if (!grabFrame()) return;
+    draw();
+    if (!S.ready) { updatePick(); return; }
+    setStatus('جارٍ البحث عن الوجوه في الصورة…');
+    S.faces = await detectOn(work, true);
+    setStatus(S.faces.length ? 'تم العثور على الوجوه. اضغط «اختر طالباً».' : 'لم أجد وجوهاً في هذه الصورة. جرّب صورة أقرب أو أوضح إضاءة.', S.faces.length ? 'ok' : 'err');
+    draw(); updatePick();
+  }
+
+  // ---------- camera ----------
+  async function startCamera(deviceId) {
+    stopCamera();
+    resetPick();
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return camUnavailable();
+    setStatus('جارٍ تشغيل الكاميرا…');
+    try {
+      const constraints = { audio: false, video: deviceId ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+                                                          : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: isPhone ? 'environment' : 'user' } };
+      S.stream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (e) { return camUnavailable(e); }
+    video.srcObject = S.stream;
+    video.play().catch(() => {});
+    S.source = 'cam'; S.img = null;
+    if (!modelStarted) { let go = () => { video.removeEventListener('playing', go); setTimeout(startModel, 300); }; video.addEventListener('playing', go); setTimeout(go, 1500); }
+    $('empty').hidden = true;
+    setBadge(true, 'بث مباشر');
+    setStatus(S.ready ? 'الكاميرا تعمل. الوجوه المحاطة بإطار جاهزة للقرعة.' : 'الكاميرا تعمل. جارٍ تحميل نموذج كشف الوجوه…', S.ready ? 'ok' : '');
+    listCameras(S.stream.getVideoTracks()[0]?.getSettings().deviceId);
+    requestAnimationFrame(liveLoop);
+  }
+  function stopCamera() {
+    if (S.stream) { S.stream.getTracks().forEach(t => t.stop()); S.stream = null; }
+  }
+  function camUnavailable(e) {
+    const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+    const msg = denied
+      ? 'لم يُسمح بالوصول إلى الكاميرا هنا. استخدم «التقاط صورة» أو «اختيار صورة» بدلاً منها، أو افتح نسخة الأداة المحفوظة على جهازك.'
+      : 'لم أجد كاميرا متاحة. استخدم «التقاط صورة» أو «اختيار صورة».';
+    setStatus(msg, 'err');
+    if (!S.source) { $('empty').hidden = false; $('emptyMsg').textContent = msg; }
+  }
+  async function listCameras(currentId) {
+    try {
+      const cams = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+      const sel = $('camSelect');
+      sel.hidden = cams.length < 2;
+      sel.innerHTML = '';
+      cams.forEach((c, i) => { const o = document.createElement('option'); o.value = c.deviceId; o.textContent = c.label || ('كاميرا ' + (i + 1)); if (c.deviceId === currentId) o.selected = true; sel.appendChild(o); });
+    } catch (e) {}
+  }
+
+  // ---------- image ----------
+  function loadImageFile(file) {
+    if (!file) return;
+    stopCamera(); resetPick();
+    const img = new Image();
+    img.onload = () => {
+      S.source = 'img'; S.img = img; S.faces = [];
+      $('empty').hidden = true; $('camSelect').hidden = true;
+      setBadge(false, 'صورة ثابتة');
+      detectOnce(); startModel();
+    };
+    img.onerror = () => setStatus('تعذّر فتح هذه الصورة. اختر ملف صورة آخر.', 'err');
+    img.src = URL.createObjectURL(file);
+  }
+
+  function setBadge(live, text) { $('badge').hidden = false; $('dot').className = 'dot' + (live ? ' live' : ''); $('badgeText').textContent = text; }
+
+  // ---------- sound ----------
+  let ac = null;
+  function tick(freq, dur, vol) {
+    if (!$('sound').checked) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + dur);
+    } catch (e) {}
+  }
+  function fanfare() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tick(f, 0.35, 0.18), i * 110)); }
+
+  // ---------- celebration: applause, crowd cheer, spoken phrase, fireworks ----------
+  let noiseBuf = null;
+  function noise() {
+    if (noiseBuf) return noiseBuf;
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return noiseBuf;
+  }
+  function applause(dur) {
+    const t0 = ac.currentTime + 0.05, out = ac.createGain(); out.gain.value = 0.9; out.connect(ac.destination);
+    const n = Math.round(dur * 70);
+    for (let i = 0; i < n; i++) {
+      const u = Math.random(), t = t0 + u * dur;
+      const env = u < 0.15 ? u / 0.15 : (u > 0.7 ? (1 - u) / 0.3 : 1);   // swell in, die out
+      const src = ac.createBufferSource(); src.buffer = noise();
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900 + Math.random() * 1800; bp.Q.value = 1.2;
+      const g = ac.createGain(); const v = (0.25 + Math.random() * 0.5) * env;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03 + Math.random() * 0.04);
+      src.connect(bp).connect(g).connect(out); src.start(t, Math.random() * 1.5, 0.1);
+    }
+  }
+  function cheer() {
+    // a small crowd shouting "yaaay": voiced saws through vowel formants, each with its own pitch, glide and vibrato
+    const t0 = ac.currentTime + 0.1, out = ac.createGain(); out.gain.value = 0.22; out.connect(ac.destination);
+    for (let v = 0; v < 10; v++) {
+      const t = t0 + Math.random() * 0.35, len = 1.1 + Math.random() * 0.9;
+      const f0 = (v % 2 ? 200 : 300) * (0.85 + Math.random() * 0.4);
+      const o = ac.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f0 * 0.8, t); o.frequency.linearRampToValueAtTime(f0 * 1.25, t + 0.25); o.frequency.linearRampToValueAtTime(f0 * 0.95, t + len);
+      const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 5 + Math.random() * 2; lg.gain.value = f0 * 0.03; lfo.connect(lg).connect(o.frequency);
+      const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.5, t + 0.08); g.gain.setValueAtTime(0.5, t + len * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      [[700 + Math.random() * 200, 6, 1], [1150 + Math.random() * 200, 8, 0.7], [2600, 10, 0.25]].forEach(([f, q, a]) => {
+        const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+        const ag = ac.createGain(); ag.gain.value = a * 3; o.connect(bp).connect(ag).connect(g);
+      });
+      g.connect(out); o.start(t); lfo.start(t); o.stop(t + len + 0.05); lfo.stop(t + len + 0.05);
+    }
+    // breathy crowd noise under the voices
+    const src = ac.createBufferSource(); src.buffer = noise();
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1000; bp.Q.value = 0.7;
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.35, t0 + 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.9);
+    src.connect(bp).connect(g).connect(out); src.start(t0); src.stop(t0 + 2);
+  }
+  let unlocked = false;
+  function unlockAudio() {
+    if (!$('sound').checked) return;
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {}
+  }
+  function speak(text) {
+    try {
+      if (!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'ar-SA'; u.rate = 0.95; u.pitch = 1.1;
+      const ar = speechSynthesis.getVoices().find(v => /^ar/i.test(v.lang)); if (ar) u.voice = ar;
+      setTimeout(() => speechSynthesis.speak(u), 900);
+    } catch (e) {}
+  }
+  function celebrate(text) {
+    if ($('sound').checked) {
+      try {
+        ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+        if (ac.state === 'suspended') ac.resume();
+        fanfare(); applause(3.2); cheer();
+      } catch (e) {}
+    }
+    fireworks();
+  }
+
+  const fx = $('fx'), fxc = fx.getContext('2d');
+  let sparks = [], fxRunning = false;
+  function fireworks() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const r = fx.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    fx.width = r.width * dpr; fx.height = r.height * dpr;
+    const colors = ['#ffc83d', '#ff5d73', '#5ee0a0', '#7d9bff', '#ff9f43', '#ffffff', '#d66bff'];
+    const bursts = 7;
+    for (let b = 0; b < bursts; b++) setTimeout(() => {
+      const x = fx.width * (0.12 + Math.random() * 0.76), y = fx.height * (0.12 + Math.random() * 0.45);
+      const c = colors[randInt(colors.length)], c2 = colors[randInt(colors.length)], n = 70;
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2, sp = (2 + Math.random() * 3.5) * dpr;
+        sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, decay: 0.012 + Math.random() * 0.012, c: i % 3 ? c : c2, s: (1.6 + Math.random() * 1.6) * dpr });
+      }
+      if ($('sound').checked && ac) tick(120 + Math.random() * 60, 0.25, 0.25);
+    }, b * 380 + Math.random() * 150);
+    if (!fxRunning) { fxRunning = true; requestAnimationFrame(fxLoop); }
+    setTimeout(() => { if (!sparks.length) fxRunning = false; }, 6000);
+  }
+  function fxLoop() {
+    fxc.clearRect(0, 0, fx.width, fx.height);
+    fxc.globalCompositeOperation = 'lighter';
+    sparks = sparks.filter(p => p.life > 0);
+    for (const p of sparks) {
+      p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.045; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      fxc.globalAlpha = Math.max(0, p.life); fxc.fillStyle = p.c;
+      fxc.beginPath(); fxc.arc(p.x, p.y, p.s, 0, Math.PI * 2); fxc.fill();
+    }
+    fxc.globalAlpha = 1; fxc.globalCompositeOperation = 'source-over';
+    if (sparks.length || fxRunning) requestAnimationFrame(fxLoop); else fxc.clearRect(0, 0, fx.width, fx.height);
+  }
+
+  // ---------- motivational phrases (each one used once before any repeats) ----------
+  const PHRASES = [
+    'جاوب يا شنب!', 'يلا يا بطل، الصف كله يسمعك!', 'وقع الاختيار على النجم!', 'أنت قدها وقدود!',
+    'دورك تلمع يا ذكي!', 'عقلك ذهب، خلّنا نسمع!', 'هات اللي عندك يا فنان!', 'ثقتنا فيك كبيرة!',
+    'يا سلام! جاء دور المبدع', 'خلّك واثق، الجواب عندك!', 'يا بطل الحصة، تفضّل!', 'الميكروفون لك يا نجم!',
+    'فرصتك تلمع اليوم!', 'جاوب وخلّ الصف يصفق لك!', 'أنت الاختيار الصح!', 'هيا يا عبقري زمانك!',
+    'ورّنا مهاراتك يا أسطورة!', 'كل الأنظار عليك يا بطل!', 'حتى لو أخطأت، المحاولة شطارة!', 'يا شاطر، الصف بانتظارك!',
+    'الليلة ليلتك يا نجم الصف!', 'هذا وقت الإبداع، انطلق!', 'جاوب يا ذيب!', 'خذ نفس وجاوب بثقة!',
+  ];
+  let bag = [];
+  function nextPhrase() {
+    if (!bag.length) { bag = PHRASES.slice(); for (let i = bag.length - 1; i > 0; i--) { const j = randInt(i + 1); [bag[i], bag[j]] = [bag[j], bag[i]]; } }
+    return bag.pop();
+  }
+
+  // ---------- the pick ----------
+  function randInt(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  async function pick() {
+    if (!S.ready || S.spinning || !S.source) return;
+    unlockAudio();   // phones only allow sound that starts inside the tap
+    S.spinning = true; S.winner = -1; updatePick();
+    $('banner').hidden = true;
+    // freeze the current frame and detect on it, so the boxes match the still picture exactly
+    if (grabFrame()) {
+      const snap = document.createElement('canvas'); snap.width = work.width; snap.height = work.height;
+      snap.getContext('2d').drawImage(work, 0, 0);
+      S.frozen = snap;
+      try { const f = await detectOn(snap, true); if (f.length) S.faces = f; } catch (e) {}
+    }
+    const n = S.faces.length;
+    if (!n) { S.spinning = false; S.frozen = null; setStatus('لا توجد وجوه ظاهرة الآن. اطلب من الطلاب النظر نحو الكاميرا.', 'err'); updatePick(); return; }
+    setBadge(false, 'القرعة جارية…');
+    const winner = randInt(n);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const steps = n === 1 ? 4 : (reduce ? 6 : 22 + randInt(6));
+    let idx = randInt(n);
+    for (let s = 0; s < steps; s++) {
+      const remaining = steps - s;
+      if (remaining === 1) idx = winner;
+      else if (n > 1) { let nx; do { nx = randInt(n); } while (nx === idx || (remaining === 2 && nx === winner)); idx = nx; }
+      S.highlight = idx; draw();
+      tick(660 + (s % 2) * 120, 0.06, 0.12);
+      const t = s / steps;
+      await sleep(reduce ? 250 : 55 + Math.pow(t, 2.6) * 420);
+    }
+    S.highlight = winner; S.winner = winner; S.spinning = false;
+    draw();
+    const phrase = nextPhrase();
+    celebrate(phrase);
+    showWinner(winner);
+    setBadge(false, 'تم الاختيار');
+    $('banner').innerHTML = ''; const ph = document.createElement('span'); ph.className = 'phrase'; ph.textContent = phrase; $('banner').appendChild(ph); $('banner').hidden = false;
+    const wp = $('phrase'); wp.textContent = phrase; wp.style.animation = 'none'; void wp.offsetWidth; wp.style.animation = '';
+    setStatus('اضغط «اختر طالباً» مرة أخرى لقرعة جديدة، أو «رجوع للكاميرا».', 'ok');
+    updatePick();
+  }
+
+  function cropFace(target, f) {
+    const c = target.getContext('2d');
+    const side = Math.max(f.w, f.h) * 1.7, cx = f.x + f.w / 2, cy = f.y + f.h / 2;
+    c.fillStyle = '#0f1526'; c.fillRect(0, 0, target.width, target.height);
+    c.drawImage(S.frozen, cx - side / 2, cy - side / 2, side, side, 0, 0, target.width, target.height);
+  }
+  function showWinner(i) {
+    const f = S.faces[i];
+    $('winnerPanel').hidden = false;
+    cropFace($('winnerCanvas'), f);
+    const h = document.createElement('canvas'); h.width = h.height = 92; cropFace(h, f);
+    h.title = 'اختيار رقم ' + ($('history').children.length + 1);
+    $('history').prepend(h); $('historyPanel').hidden = false;
+  }
+
+  function resetPick() {
+    S.frozen = null; S.winner = -1; S.highlight = -1; S.faces = [];
+    $('banner').hidden = true; $('winnerPanel').hidden = true;
+    updatePick();
+  }
+  function backToLive() {
+    S.frozen = null; S.winner = -1; S.highlight = -1; $('banner').hidden = true; $('winnerPanel').hidden = true;
+    if (S.source === 'cam') { setBadge(true, 'بث مباشر'); setStatus('الكاميرا تعمل. الوجوه المحاطة بإطار جاهزة للقرعة.', 'ok'); }
+    else if (S.source === 'img') { setBadge(false, 'صورة ثابتة'); draw(); }
+    updatePick();
+  }
+
+  // ---------- wiring ----------
+  $('startCam').onclick = $('startCam2').onclick = () => startCamera();
+  $('camSelect').onchange = (e) => startCamera(e.target.value);
+  $('fileBtn').onclick = $('fileBtn2').onclick = () => $('fileInput').click();
+  $('snapBtn').onclick = () => $('snapInput').click();
+  $('fileInput').onchange = (e) => { loadImageFile(e.target.files[0]); e.target.value = ''; };
+  $('snapInput').onchange = (e) => { loadImageFile(e.target.files[0]); e.target.value = ''; };
+  $('pickBtn').onclick = pick;
+  $('againBtn').onclick = backToLive;
+  $('mirror').onchange = () => { if (S.source === 'cam') backToLive(); };
+  $('fsBtn').onclick = () => {
+    const st = $('stage');
+    try { document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen().catch(() => {}); } catch (e) {}
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !e.target.closest('button, input, select')) { e.preventDefault(); pick(); }
+  });
+
+  // Start the detector only once the picture is on screen (or after a quiet moment),
+  // so preparing it never holds up the camera.
+  let modelStarted = false;
+  const startModel = () => { if (!modelStarted) { modelStarted = true; loadModel(); } };
+  setTimeout(startModel, 4000);
+})();
+</script>
+</body></html>

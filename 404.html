@@ -1,0 +1,13 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>الصفحة غير موجودة</title>
+<script>
+(function(){
+  var sites=['nabd-alfahm','mihwar','fasli-live','itqan-hifz-class','knowledge-hunter-ar','qsts-class-portal','legendary-trifle-836446','maarifa-arena','qur3at-alsaf-camera','tafaul-alsaf','group-worksheet-ar'];
+  var p=location.pathname, seg=p.split('/')[1]||'';
+  if(sites.indexOf(seg)===-1){
+    var last=null; try{last=sessionStorage.getItem('lastSite')}catch(e){}
+    if(last){ location.replace('/'+last+p+location.search+location.hash); return; }
+  }
+})();
+</script>
+<style>body{font-family:system-ui,Tahoma,sans-serif;text-align:center;padding:4rem;color:#333}</style></head>
+<body><h1>الصفحة غير موجودة</h1><p><a href="/">العودة إلى قائمة المواقع</a></p></body></html>

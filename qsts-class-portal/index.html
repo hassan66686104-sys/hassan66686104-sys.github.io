@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="بوابة الصف">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#081452">
+<link rel="apple-touch-icon" href="/qsts-class-portal/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/qsts-class-portal/favicon.png">
+<link rel="manifest" href="/qsts-class-portal/manifest.webmanifest">
+<title>بوابة الصف التفاعلية</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: iPhone-style home screen. Clock and dates on top, a grid of large app icons centred in the screen. */
+:root {
+  --ink: #1c1c1e;
+  --muted: #6e6e73;
+  --hair: rgba(60, 60, 67, 0.14);
+  --blue: #007aff;
+  --red: #ff3b30;
+  --glass-strong: rgba(255, 255, 255, 0.82);
+  --glass-line: rgba(255, 255, 255, 0.7);
+  --font: -apple-system, "SF Arabic", "SF Pro Display", "Cairo", "Segoe UI", Tahoma, sans-serif;
+  color-scheme: light;
+}
+html { height: 100%; background: #081452; }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #081452;
+  color: #fff;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 28px;
+  min-height: 100dvh;
+  display: flex;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Wallpaper: deep navy ground, a textured periwinkle disc top right, a teal disc bottom left fading into shadow, and a bright blue arc glowing bottom right; slow drift and gentle colour shift */
+.wall { position: fixed; top: calc(0px - env(safe-area-inset-top, 0px)); left: 0; right: 0; bottom: calc(0px - env(safe-area-inset-bottom, 0px) - 80px); min-height: 110lvh; z-index: 0; overflow: hidden; pointer-events: none;
+  background: radial-gradient(120% 90% at 20% 10%, #0d2170 0%, #081452 40%, #040b33 75%, #02061f 100%);
+  animation: hueShift 40s ease-in-out infinite; }
+.disc { position: absolute; border-radius: 50%; will-change: transform; }
+.d-deep { width: 120vmax; height: 120vmax; right: -70vmax; bottom: -62vmax;
+  background: radial-gradient(circle at 22% 30%, rgba(150,210,255,0.95) 0%, rgba(70,150,240,0.85) 14%, rgba(28,70,210,0.7) 32%, rgba(8,20,90,0) 58%);
+  box-shadow: inset 0 0 0 2px rgba(90,150,255,0.9), 0 0 40px rgba(60,120,255,0.55);
+  animation: driftA 50s ease-in-out infinite alternate; }
+.d-blue { width: 74vmax; height: 74vmax; right: -14vmax; top: -34vmax;
+  background:
+    repeating-linear-gradient(150deg, rgba(255,255,255,0) 0 5vmax, rgba(255,255,255,0.08) 7vmax, rgba(255,255,255,0) 9vmax),
+    radial-gradient(circle at 45% 75%, #a9b8f4 0%, #7d91e6 35%, #5367d2 70%, #3d4fbf 100%);
+  box-shadow: inset 0 0 0 1.5px rgba(170,190,255,0.55), inset -30px -50px 90px rgba(10,20,90,0.45), 0 30px 70px -20px rgba(0,0,40,0.6);
+  animation: driftB 56s ease-in-out infinite alternate; }
+.d-mint { width: 100vmax; height: 100vmax; left: -52vmax; bottom: -50vmax;
+  background:
+    repeating-linear-gradient(-35deg, rgba(255,255,255,0) 0 6vmax, rgba(255,255,255,0.06) 8vmax, rgba(255,255,255,0) 10vmax),
+    radial-gradient(circle at 72% 18%, #7fd3c3 0%, #4aa99c 28%, #2a7a75 52%, #13484a 75%, #082528 100%);
+  box-shadow: inset 0 0 0 1.5px rgba(150,230,220,0.45), 0 -20px 70px -20px rgba(0,10,30,0.6);
+  animation: driftC 62s ease-in-out infinite alternate; }
+.grain { position: absolute; inset: 0; opacity: 0.12; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+@keyframes driftA { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(-3vmax, -2vmax) rotate(6deg); } }
+@keyframes driftB { from { transform: translate(0, 0) scale(1); } to { transform: translate(-4vmax, 3vmax) scale(1.05); } }
+@keyframes driftC { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(4vmax, -3vmax) rotate(-5deg); } }
+@keyframes hueShift {
+  0%, 100% { filter: hue-rotate(0deg) saturate(1); }
+  33% { filter: hue-rotate(-14deg) saturate(1.1); }
+  66% { filter: hue-rotate(16deg) saturate(1.05); }
+}
+
+
+.screen { position: relative; z-index: 1; width: 100%; max-width: 900px; margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: 14px; flex: 1; }
+
+/* Header */
+.top { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; width: 100%; }
+.clock { font-size: clamp(56px, 11vw, 96px); font-weight: 700; letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+.dates { font-size: 17px; font-weight: 600; }
+.dates span { color: rgba(255, 255, 255, 0.78); font-weight: 400; }
+.credit { font-size: 13px; color: rgba(255, 255, 255, 0.8); }
+.clock, .dates, .credit { text-shadow: 0 2px 14px rgba(0, 0, 30, 0.55); }
+
+/* Home grid */
+.home {
+  width: 100%;
+  max-width: 720px;
+  margin-block: auto;
+  padding-block: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px 18px;
+  justify-items: center;
+}
+.app { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 150px; text-align: center; -webkit-tap-highlight-color: transparent; }
+.app:focus-visible .tile { outline: 3px solid #fff; outline-offset: 4px; }
+.app .hop { display: block; animation: hop 3s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.tile {
+  width: clamp(72px, 19vw, 128px); aspect-ratio: 1; max-width: 100%;
+  border-radius: 23%;
+  display: grid; place-items: center;
+  color: #fff;
+  background: var(--g);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 30, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  position: relative; overflow: hidden;
+  transition: transform 0.2s cubic-bezier(.2,.8,.2,1);
+}
+.tile::after { content: ""; position: absolute; inset: 0 0 50% 0; background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0)); }
+.tile svg { width: 56%; height: 56%; position: relative; z-index: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.18)); }
+.app:hover .tile { transform: scale(1.07) translateY(-3px); }
+.app:active .tile { transform: scale(0.9); }
+.app .lbl { font-size: clamp(13px, 2.6vw, 17px); font-weight: 700; color: #fff; line-height: 1.3; text-shadow: 0 1px 6px rgba(0, 0, 30, 0.6); text-wrap: balance; }
+@keyframes hop {
+  0%, 72%, 100% { transform: translateY(0); }
+  80% { transform: translateY(-14px); }
+  88% { transform: translateY(0); }
+  94% { transform: translateY(-5px); }
+}
+@media (max-width: 380px) { .home { gap: 24px 10px; } }
+
+/* Sheets */
+dialog {
+  border: 0; padding: 0; background: transparent; color: var(--ink);
+  width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 40px);
+  margin: auto auto max(16px, env(safe-area-inset-bottom, 0px));
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.35); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.sheet { display: flex; flex-direction: column; gap: 8px; }
+.card { background: rgba(250, 250, 252, 0.94); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8); border-radius: 18px; overflow: hidden; }
+.sheet-head { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--hair); }
+.sheet-head .tile { width: 56px; flex: none; border-radius: 14px; }
+.sheet-head h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.sheet-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); text-wrap: pretty; }
+.sheet-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px; font-size: 17px; font-weight: 600; color: var(--blue); text-decoration: none; cursor: pointer; background: none; border: 0; width: 100%; font-family: inherit; }
+.sheet-btn + .sheet-btn { border-top: 1px solid var(--hair); }
+.sheet-btn:hover { background: rgba(0, 0, 0, 0.04); }
+.sheet-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.sheet-btn svg { width: 20px; height: 20px; }
+.sheet-btn.cancel { font-weight: 700; }
+.sheet-btn.danger { color: var(--red); }
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wall" aria-hidden="true">
+  <div class="disc d-deep"></div><div class="disc d-blue"></div><div class="disc d-mint"></div><div class="grain"></div>
+</div>
+
+<main class="screen">
+  <header class="top">
+    <div class="clock" id="clock" dir="ltr">--:--</div>
+    <div class="dates" id="dates"></div>
+    <div class="credit">إعداد الأستاذ الحسن علي</div>
+  </header>
+
+  <nav class="home" id="home" aria-label="التطبيقات"></nav>
+</main>
+
+<!-- App chooser -->
+<dialog id="chooser" aria-labelledby="chTitle">
+  <div class="sheet">
+    <div class="card">
+      <div class="sheet-head">
+        <div class="tile" id="chTile"></div>
+        <div><h3 id="chTitle"></h3><p id="chDesc"></p></div>
+      </div>
+      <a class="sheet-btn" id="chTeacher" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+        صفحة المعلم
+      </a>
+      <a class="sheet-btn" id="chStudent" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        صفحة الطالب
+      </a>
+    </div>
+    <div class="card"><button class="sheet-btn cancel" type="button" data-close>إلغاء</button></div>
+  </div>
+</dialog>
+
+<script>
+/* ---------- Storage (per device) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("qsts." + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("qsts." + k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+
+
+/* ---------- Click sound ---------- */
+let audioCtx = null;
+function playClick() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime, osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(1500, t);
+    osc.frequency.exponentialRampToValueAtTime(450, t + 0.08);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.45, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t); osc.stop(t + 0.12);
+  } catch (e) {}
+}
+
+
+/* ---------- Apps ---------- */
+const GLYPH = {
+  pulse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="rgba(255,255,255,0.25)"/><path d="M5.5 12.5h3l1.5-3 2.5 5 1.5-2h4"/></svg>',
+  sheet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3" fill="rgba(255,255,255,0.25)"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>',
+  poll: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="11" width="4" height="9" rx="1.2"/><rect x="10" y="5" width="4" height="15" rx="1.2"/><rect x="16" y="8" width="4" height="12" rx="1.2"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5a2 2 0 0 1 2-2h2.2L9.3 4h5.4l1.6 2.5h2.2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="rgba(255,255,255,0.2)"/><circle cx="12" cy="12.5" r="3.6"/><circle cx="17.3" cy="9.3" r="0.6" fill="currentColor"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5c0-4 3.6-7 8-7s8 3 8 7-3.6 7-8 7c-1 0-2-.15-2.9-.45L5 19.5l1.2-3.3C4.8 14.9 4 13.3 4 11.5z" fill="rgba(255,255,255,0.25)"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01" stroke-width="3"/></svg>',
+  hunter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="rgba(255,255,255,0.18)"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="M12 8.2 14.6 12 12 15.8 9.4 12z" fill="currentColor"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" fill="rgba(255,255,255,0.22)"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/><path d="M9.5 8h6M9.5 11.5h4"/></svg>',
+  live: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2.5" fill="rgba(255,255,255,0.2)"/><path d="M10.5 8.6v4.8l4-2.4z" fill="currentColor"/><path d="M8 21h8M12 17v4"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="rgba(255,255,255,0.25)"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4M12 14v3.5M8.5 20h7M9.5 17.5h5"/></svg>'
+};
+
+const APPS = [
+  { name: "نبض الفهم", desc: "بنك الأسئلة التفاعلي: اسأل، شارك، افهم.", glyph: "pulse", g: "linear-gradient(160deg,#ff6b81,#ff2d55)",
+    teacher: "https://nabd-alfahm.netlify.app", student: "https://nabd-alfahm.netlify.app/?as=student" },
+  { name: "ورقة العمل", desc: "أوراق عمل جماعية يحلها الطلاب معاً داخل الصف.", glyph: "sheet", g: "linear-gradient(160deg,#ffd60a,#ff9f0a)",
+    teacher: "https://group-worksheet-ar.netlify.app/#/teacher", student: "https://group-worksheet-ar.netlify.app/#/" },
+  { name: "تصويت الصف", desc: "تصويت مباشر من الهاتف دون حساب، والنتائج تظهر على الشاشة فوراً.", glyph: "poll", g: "linear-gradient(160deg,#4cd964,#1fa94a)",
+    teacher: "https://tafaul-alsaf.netlify.app/teacher.html", student: "https://tafaul-alsaf.netlify.app/" },
+  { name: "تواصل", desc: "غرفة دردشة آمنة بين المعلم وطلابه: محادثة لكل درس، ودخول الطلاب برابط أو رمز QR، وإرسال صور من الكاميرا.", glyph: "chat", g: "linear-gradient(160deg,#5ac8fa,#0a84ff)",
+    teacher: "https://hassan66686104-sys.github.io/Tawasul/login", student: "https://hassan66686104-sys.github.io/Tawasul/" },
+  { name: "صيّاد المعرفة", desc: "لعبة بالواقع المعزز: يبحث الطلاب حولهم عن الإجابات ويلتقطونها، ويتابع المعلم من لوحته.", glyph: "hunter", g: "linear-gradient(160deg,#ffb347,#ff6a1f)",
+    teacher: "https://knowledge-hunter-ar.netlify.app/#/teacher", student: "https://knowledge-hunter-ar.netlify.app/#/" },
+  { name: "ساحة التحدي", desc: "تحدٍّ معرفي بين الطلاب: سائل ومجيب، والمعلم يحكم ويمنح النقاط.", glyph: "trophy", g: "linear-gradient(160deg,#7d7aff,#bf5af2)",
+    direct: "https://maarifa-arena.netlify.app/" },
+  { name: "دفتر الدروس", desc: "دفتر روابط الدروس مرتبة حسب الصف، يضيفها المعلم ويفتحها الطلاب.", glyph: "book", g: "linear-gradient(160deg,#3fd8c2,#0b8f8f)",
+    direct: "https://lessons.lessons-site.workers.dev/" },
+  { name: "فصلي LIVE", desc: "حصة تفاعلية مباشرة على كل أجهزة الصف: شرائح وألعاب تعليمية وسبورة تعاونية، ويدخل الطلاب برمز الحصة دون حسابات.", glyph: "live", g: "linear-gradient(160deg,#3d6fe0,#0b1f3a)",
+    direct: "https://fasli-live-qa.pages.dev/" },
+  { name: "قرعة الكاميرا", desc: "وجّه الكاميرا نحو الطلاب، وتختار القرعة طالباً عشوائياً.", glyph: "camera", g: "linear-gradient(160deg,#8e8e93,#3a3a3c)",
+    direct: "https://qur3at-alsaf-camera.netlify.app/" }
+];
+
+
+const home = document.getElementById("home");
+const chooser = document.getElementById("chooser");
+APPS.forEach((app, i) => {
+  const el = document.createElement(app.direct ? "a" : "button");
+  el.className = "app";
+  if (app.direct) { el.href = app.direct; el.target = "_blank"; el.rel = "noopener"; }
+  else el.type = "button";
+  el.setAttribute("aria-label", app.name + ": " + app.desc);
+  el.style.setProperty("--d", (i * 0.4) + "s");
+  el.innerHTML = '<span class="hop"><span class="tile" style="--g:' + app.g + '">' + GLYPH[app.glyph] + '</span></span><span class="lbl"></span>';
+  el.querySelector(".lbl").textContent = app.name;
+  el.addEventListener("click", () => { playClick(); if (!app.direct) openChooser(app); });
+  home.appendChild(el);
+});
+function openChooser(app) {
+  const tile = document.getElementById("chTile");
+  tile.style.setProperty("--g", app.g);
+  tile.innerHTML = GLYPH[app.glyph];
+  document.getElementById("chTitle").textContent = app.name;
+  document.getElementById("chDesc").textContent = app.desc;
+  document.getElementById("chTeacher").href = app.teacher;
+  document.getElementById("chStudent").href = app.student;
+  chooser.showModal();
+}
+document.querySelectorAll("dialog").forEach(d => {
+  d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  d.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => { playClick(); d.close(); }));
+});
+["chTeacher", "chStudent"].forEach(id => document.getElementById(id).addEventListener("click", () => { playClick(); setTimeout(() => chooser.close(), 150); }));
+
+/* ---------- Clock and dates ---------- */
+const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const fmtGreg = new Intl.DateTimeFormat("ar-QA-u-nu-latn", { day: "numeric", month: "long", year: "numeric" });
+let fmtHijri = null;
+try { fmtHijri = new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura-nu-latn", { day: "numeric", month: "long", year: "numeric" }); } catch (e) {}
+const pad = n => String(n).padStart(2, "0");
+function to12(h, m) { const hh = h % 12 || 12; return hh + ":" + pad(m); }
+
+function tickClock(now) {
+  document.getElementById("clock").textContent = to12(now.getHours(), now.getMinutes());
+  const hijri = fmtHijri ? fmtHijri.format(now) : "";
+  const d = document.getElementById("dates");
+  d.textContent = "";
+  d.append(DAYS[now.getDay()] + "، " + fmtGreg.format(now));
+  if (hijri) { const s = document.createElement("span"); s.textContent = "  ·  " + hijri; d.append(s); }
+}
+
+
+function tick() { tickClock(new Date()); }
+tick();
+setInterval(tick, 15000);
+</script>
+
+</body>
+</html>

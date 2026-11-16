@@ -1,0 +1,1420 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6fa">
+<title>ساحة التحدي المعرفي</title>
+<meta name="app-version" content="5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Lalezar&display=swap">
+<style>
+/* ألوان هادئة: الكهرماني للأسئلة، الفيروزي للأجوبة، المرجاني للالتقاط، والباقي رمادي مريح */
+:root{
+  --bg:#f5f6fa; --bg2:#f9fafc; --panel:#ffffff; --panel2:#eef0f6; --line:#e0e3ec;
+  --ink:#262b40; --muted:#6b7189; --gold:#ecc56a; --gold-t:#94681a; --gold-ink:#3d2a05; --cyan:#7cc7cf; --cyan-t:#2a7c86; --cyan-ink:#0f3a3f;
+  --hot:#e2717f; --ok:#4aa77a; --bad:#cf5c63;
+  --display:"Lalezar","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(900px 460px at 85% -160px,#fbf0d9 0%,transparent 60%),radial-gradient(900px 460px at 10% -160px,#e0f2f3 0%,transparent 60%),var(--bg);background-attachment:fixed;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:max(12px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-bottom,0px));-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:14px;padding:12px 18px;font-weight:700;background:var(--panel2);color:var(--ink);min-height:48px;transition:transform .08s,filter .2s,opacity .2s}
+button:hover{filter:brightness(1.04)}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.gold{background:var(--gold);color:var(--gold-ink)}
+button.cyan{background:var(--cyan);color:var(--cyan-ink)}
+button.ok{background:var(--ok);color:#fff}
+button.bad{background:var(--bad);color:#fff}
+button.hot{background:var(--hot);color:#fff}
+button.ghost{background:var(--panel);border:2px solid var(--line)}
+button.sm{min-height:38px;padding:6px 12px;font-size:14px;border-radius:10px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input,select,textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;min-height:48px}
+input:focus,textarea:focus{border-color:var(--gold);outline:none}
+textarea{min-height:100px;resize:vertical}
+label{font-weight:700;font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.25;text-wrap:balance}
+.wrap{max-width:2200px;margin:0 auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 6px 24px #1a215012}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.center{text-align:center}
+.num{font-variant-numeric:tabular-nums}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:12px 20px;border-radius:14px;z-index:60;max-width:90vw;font-weight:700;box-shadow:0 10px 30px #1a215033}
+.toast.err{background:var(--bad);color:#fff;border-color:var(--bad)}
+.toast.win{background:var(--ok);color:#fff;border-color:var(--ok)}
+
+/* الصفحة الأولى */
+.hero{padding:44px 0 28px;text-align:center}
+.logo{font-family:var(--display);font-size:clamp(44px,9vw,86px);line-height:1.05;letter-spacing:.5px}
+.logo .q{color:var(--gold-t)}
+.logo .a{color:var(--cyan-t)}
+.hero p{font-size:18px;color:var(--muted);max-width:620px;margin:10px auto 0}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;max-width:780px;margin:0 auto}
+.choice{background:var(--panel);box-shadow:0 6px 24px #1a215012;border:2px solid var(--line);border-radius:22px;padding:26px;text-align:right;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.choice b{font-family:var(--display);font-weight:400;font-size:32px}
+.choice span{font-weight:400;color:var(--muted)}
+.choice:hover{border-color:var(--gold)}
+.rules{max-width:780px;margin:24px auto 0}
+.rules ol{margin:8px 0 0;padding-inline-start:22px}
+.form{max-width:540px;margin:20px auto}
+/* شاشات الكمبيوتر العريضة: كل الصفحات تمتد بعرض الشاشة */
+@media (min-width:1100px){
+  .choices,.rules{max-width:none}
+  .choices{grid-template-columns:1fr 1fr}
+  .form{max-width:min(1200px,100%)}
+  .hero p{max-width:900px}
+  .roles{gap:16px}.rolecard{padding:28px}
+  .rules ol{columns:2;column-gap:40px}
+}
+@media (min-width:1600px){body{font-size:18px}.lb li .s{font-size:28px}.stage .bigq{font-size:clamp(34px,3vw,58px)}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* الشريط العلوي */
+.hud{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.hud h2{font-size:clamp(22px,3vw,30px)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 14px;display:flex;align-items:center;gap:10px}
+.code small{color:var(--muted);font-weight:700}
+.code b{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:4px;color:var(--gold-t)}
+.bigclock{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 14px}
+.bigclock small{color:var(--muted);font-weight:700}
+.bigclock b{font-family:var(--display);font-weight:400;font-size:30px;font-variant-numeric:tabular-nums}
+.bigclock.low b{color:var(--hot)}
+.me{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 12px}
+.badge{font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px}
+.badge.asker{background:var(--gold);color:var(--gold-ink)}
+.badge.answerer{background:var(--cyan);color:var(--cyan-ink)}
+.me .pts{font-family:var(--display);font-size:28px;line-height:1}
+
+/* اللوحة: صف أسئلة وصف أجوبة */
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;position:relative}
+.rowlabel{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--muted)}
+.rowlabel i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tile{min-height:128px;max-width:100%;border-radius:16px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;text-align:center;min-height:0;min-width:0;overflow:hidden;position:relative;font-weight:500;border:2px solid transparent}
+.tile .n{font-family:var(--display);font-size:clamp(18px,2.6vw,30px);line-height:1;opacity:.9}
+.tile .t{font-size:clamp(12px,1.15vw,14px);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.tile .who{font-size:clamp(10px,1vw,12px);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .pt{direction:ltr;unicode-bidi:isolate;position:absolute;top:6px;left:6px;font-size:12px;font-weight:700;padding:1px 7px;border-radius:99px;background:#ffffffcc;color:var(--ink)}
+.q-empty{background:#fdf8ec;border-color:#efdcab;color:var(--gold-t)}
+.q-empty.can{cursor:pointer;border-color:var(--gold);box-shadow:0 0 0 0 #ecc56a55;animation:glow 2s infinite}
+.q-empty.can:hover{background:#fbefd2}
+@keyframes glow{50%{box-shadow:0 0 14px 2px #ecc56a66}}
+.q-full{background:linear-gradient(160deg,#f6dd9a,#ecc56a);color:var(--gold-ink)}
+.q-full.dim{filter:saturate(.35);opacity:.7}
+.a-empty{background:#eef8f9;border-color:#c4e5e8;color:#4e98a0}
+.a-full{background:linear-gradient(160deg,#b6e2e6,#7cc7cf);color:var(--cyan-ink)}
+.a-wrong{background:#fbeaec;color:#a8434d;border-color:#f0c3c8}
+.a-miss{background:repeating-linear-gradient(135deg,#f1f3fb 0 10px,#e7ebf7 10px 20px);color:var(--muted);border-color:var(--line)}
+.tile.live{border-color:var(--hot);box-shadow:0 0 0 3px #e2717f44,0 0 18px #e2717f44;animation:none}
+.tile.clickable{cursor:pointer}
+.locked .q-empty.can{animation:none;cursor:not-allowed;border-color:#efdcab}
+.lockveil{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+
+/* الحلبة: السؤال الكبير */
+.stage{border-radius:24px;padding:20px;box-shadow:0 8px 30px #1a215014;background:radial-gradient(600px 220px at 50% 0,#f1f2fb,transparent),var(--panel);border:1px solid var(--line);margin-bottom:14px;position:relative;overflow:hidden}
+.stage .kicker{font-weight:700;color:var(--muted);font-size:15px}
+.stage .bigq{font-size:clamp(24px,4.2vw,46px);font-weight:700;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap;text-align:center;margin:8px 0}
+.stage .biga{font-size:clamp(20px,3vw,32px);font-weight:700;color:var(--cyan-t);text-align:center;overflow-wrap:anywhere;white-space:pre-wrap}
+.ring{--p:100;width:118px;height:118px;border-radius:50%;background:conic-gradient(var(--rc,var(--gold)) calc(var(--p)*1%),#e8eaf2 0);display:grid;place-items:center;flex:none}
+.ring b{width:94px;height:94px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-family:var(--display);font-weight:400;font-size:40px;font-variant-numeric:tabular-nums}
+.ring.low{--rc:var(--hot)}
+.capture{width:100%;min-height:180px;border-radius:28px;font-family:var(--display);font-weight:400;font-size:clamp(40px,10vw,72px);background:radial-gradient(circle at 50% 30%,#ef9ca7,var(--hot));color:#fff;box-shadow:0 10px 0 #b9505e,0 0 26px #e2717f44;animation:pulse 1s infinite}
+.capture:active{box-shadow:0 2px 0 #b9505e;transform:translateY(8px)}
+@keyframes pulse{50%{filter:brightness(1.08);transform:scale(1.015)}}
+.judge{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.judge button{min-height:66px;font-size:20px}
+
+/* لوحة النتائج */
+.lb{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lb h3{font-size:22px;margin-bottom:6px}
+.lb ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lb li{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-weight:700}
+.lb li .r{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--panel2);flex:none}
+.lb li .s{margin-inline-start:auto;font-family:var(--display);font-weight:400;font-size:24px;font-variant-numeric:tabular-nums}
+.lb li.mine{border-color:var(--gold)}
+.lb li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb .gold-t{color:var(--gold-t)} .lb .cyan-t{color:var(--cyan-t)}
+.lb li.idle{opacity:.5}
+.lb li button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+
+/* الأدوار */
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rolecard{border-radius:20px;padding:20px;text-align:center;border:3px solid var(--line);background:#fff;display:flex;flex-direction:column;gap:4px;align-items:center}
+.rolecard b{font-family:var(--display);font-weight:400;font-size:30px}
+.rolecard span{font-weight:400;color:var(--muted);font-size:14px}
+.rolecard .cnt{font-style:normal;font-weight:700;font-size:13px;margin-top:4px;padding:2px 10px;border-radius:99px;background:var(--panel2);color:var(--ink)}
+.rolecard:disabled{opacity:.45;filter:grayscale(.6)}
+.rolecard.asker b{color:var(--gold-t)} .rolecard.answerer b{color:var(--cyan-t)}
+.rolecard.asker.on{border-color:var(--gold);background:#fdf3dc}
+.rolecard.answerer.on{border-color:var(--cyan);background:#e6f5f6}
+
+/* النهاية */
+.podium{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.champ{border-radius:24px;padding:24px;text-align:center;border:2px solid}
+.champ.gold-c{border-color:var(--gold);background:radial-gradient(circle at 50% 0,#fbeccb,var(--panel))}
+.champ.cyan-c{border-color:var(--cyan);background:radial-gradient(circle at 50% 0,#d8eff1,var(--panel))}
+.champ .crown{font-size:46px;line-height:1}
+.champ .nm{font-family:var(--display);font-size:clamp(30px,5vw,48px)}
+.champ .sc{font-family:var(--display);font-size:clamp(40px,7vw,72px);line-height:1}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:55}
+
+.modal{position:fixed;inset:0;background:#1a215066;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal .panel{max-width:540px;width:100%;max-height:90vh;overflow:auto}
+.qr{display:flex;justify-content:center}
+.qr img{width:240px;height:240px;image-rendering:pixelated;border-radius:12px;background:#fff;padding:6px}
+.linkbox{direction:ltr;text-align:left;background:var(--bg2);border-radius:10px;padding:10px;font-size:14px;overflow-wrap:anywhere;user-select:all}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,420px);gap:16px;align-items:start}
+@media (min-width:981px){.tile{min-height:clamp(110px,13vh,180px)}}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .board{gap:5px}
+  .tile{border-radius:10px;padding:4px;min-height:0;aspect-ratio:1/1;justify-content:center}
+  .tile .t,.tile .who{display:none}
+  .tile .pt{display:none}
+  .tile .who{display:none}
+  .lb,.podium,.roles{grid-template-columns:1fr}
+  .ring{width:92px;height:92px}.ring b{width:72px;height:72px;font-size:30px}
+}
+/* أيقونات متحركة */
+.ic{display:inline-block;line-height:1}
+.ic.bob{animation:bob 2.4s ease-in-out infinite}
+.ic.spin{animation:spin 2.6s linear infinite}
+.ic.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
+.ic.wig{animation:wig 1.8s ease-in-out infinite}
+.ic.beat{animation:beat 1.1s ease-in-out infinite}
+.ic.float{animation:float 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.stage{animation:rise .35s ease both}
+.bigicon{font-size:56px;line-height:1}
+.choice .ic{font-size:34px}
+.mute{min-width:44px;padding:6px 10px}
+
+/* قسم: المعلم يسأل */
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.modecard{border:2px solid var(--line);background:#fff;border-radius:16px;padding:14px 10px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center;font-weight:400}
+.modecard b{font-family:var(--display);font-weight:400;font-size:22px}
+.modecard span{font-size:13px;color:var(--muted)}
+.modecard .ic{font-size:30px}
+.modecard.on{border-color:var(--gold);background:#fdf6e6}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.slot{border:2px dashed var(--line);border-radius:16px;padding:10px;text-align:center;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg2);min-width:0}
+.slot .no{font-family:var(--display);font-size:26px;line-height:1;color:var(--muted)}
+.slot .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;font-size:clamp(14px,1.8vw,19px)}
+.slot small{color:var(--muted);font-weight:700;font-size:12px}
+.slot.on{border-style:solid;border-color:var(--cyan);background:#eef8f9;animation:pop .45s cubic-bezier(.3,1.6,.5,1) both}
+.slot.on .no{color:var(--cyan-t)}
+.slot.me{box-shadow:0 0 0 3px #ecc56a99}
+.answers{display:flex;flex-direction:column;gap:10px}
+.ans{display:flex;gap:12px;align-items:center;border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;text-align:right;width:100%;font-weight:400;min-height:64px;animation:rise .3s ease both}
+.ans .no{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-weight:700;flex:none}
+.ans .tx{flex:1;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;font-size:clamp(17px,2.2vw,22px);font-weight:700}
+.ans .by{font-size:13px;color:var(--muted);font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap;white-space:normal}
+.ans .side{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;font-size:13px;color:var(--muted);min-width:64px}
+.ans .side .ic{font-size:24px}
+.ans .pts{font-family:var(--display);font-weight:400;font-size:28px;line-height:1;color:var(--ink)}
+.ans.pick{cursor:pointer}
+.ans.sel,.ans.win{border-color:var(--ok);background:#eef7f1}
+.ans.sel .no,.ans.win .no{background:var(--ok);color:#fff}
+.ans.lose{opacity:.7}
+.ans.mine{box-shadow:0 0 0 3px #ecc56a99}
+.ans.voted{border-color:var(--cyan);background:#eef8f9}
+.ans.voted .no{background:var(--cyan);color:var(--cyan-ink)}
+button.ans:disabled{opacity:.55}
+.vbar{height:8px;border-radius:99px;background:var(--panel2);overflow:hidden;width:64px}
+.vbar i{display:block;height:100%;background:var(--cyan);border-radius:99px;transition:width .4s}
+.tag{font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--panel2);color:var(--muted)}
+.tag.fast{background:#fbf0d6;color:var(--gold-t)}
+.log{display:flex;flex-direction:column;gap:8px}
+.log .it{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.log .q{font-weight:700;overflow-wrap:anywhere}
+.log .w{font-size:14px;color:var(--muted)}
+.lb.one{grid-template-columns:1fr}
+.lb li.up{animation:flashU 1.8s ease}
+.lb li.down{animation:flashD 1.8s ease}
+@keyframes flashU{0%,55%{background:#e3f3ea;border-color:var(--ok)}}
+@keyframes flashD{0%,55%{background:#fbe9ea;border-color:var(--bad)}}
+.delta{position:fixed;z-index:70;left:50%;top:38%;font-family:var(--display);font-size:64px;pointer-events:none;animation:fly 1.7s ease forwards}
+.delta.up{color:var(--ok)} .delta.down{color:var(--bad)}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,20px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-90px) scale(1)}}
+.podium3{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;align-items:end}
+.champ.n-c{border-color:var(--line);background:var(--panel)}
+.podium3 .p1{padding-block:34px}
+@media (max-width:640px){.slots{gap:6px}.slot{min-height:76px;padding:6px}.modes,.podium3{grid-template-columns:1fr}.podium3 .p1{order:-1}.ans{padding:10px}.ans .side{min-width:48px}}
+/* قسم: شرح الدرس */
+.inkp{margin-top:14px}
+.inkp.full{position:fixed;inset:0;z-index:45;margin:0;border-radius:0;overflow:auto}
+.inkstage{text-align:center;line-height:0}
+.inkwrap{position:relative;display:inline-block;max-width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.inkwrap img{display:block;max-width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+.inkp.full .inkwrap img{max-height:calc(100vh - 120px);width:auto}
+.inkwrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.inkwrap.hand canvas{pointer-events:none}
+.inktools{gap:6px}
+.inktools .tool{min-height:40px;padding:6px 10px}
+.inktools .tool.on{background:var(--gold);color:var(--gold-ink)}
+.sw{width:30px;height:30px;min-height:30px;border-radius:50%;padding:0;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.prepgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:16px;align-items:start}
+.prepgrid:has(> #s-img:empty){grid-template-columns:minmax(0,820px);justify-content:center}
+.prepgrid .inkp{margin-top:0}
+.stage .inkwrap img{max-height:340px;width:auto}
+@media (max-width:980px){.prepgrid{grid-template-columns:1fr}}
+.prep{display:flex;flex-direction:column;gap:8px}
+.prepbox{display:flex;gap:8px;align-items:flex-start}
+.prepbox .no{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-weight:700;flex:none;margin-top:8px}
+.prepbox textarea{min-height:64px;flex:1}
+.prepbox button{flex:none;margin-top:6px}
+.ready{display:flex;flex-direction:column;gap:8px;text-align:right}
+.chip{display:flex;gap:10px;align-items:center;justify-content:space-between;text-align:right;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:500;width:100%;min-height:52px}
+.chip .tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.chip b{flex:none;color:var(--cyan-t)}
+button.chip:hover{border-color:var(--cyan)}
+.chip.used{opacity:.5}
+.lb li .tag{margin-inline-start:4px;white-space:nowrap;flex:none}
+@media (prefers-reduced-motion:reduce){.capture,.q-empty.can,.ic,.stage,.slot.on,.ans,.lb li,.delta{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><p class="center muted" style="padding-top:80px">جارٍ التحميل…</p></div>
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<canvas id="confetti" hidden></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const SB_URL = 'https://pqkaotqtwdaoolbjzpyk.supabase.co';
+const SB_KEY = 'sb_publishable_6TUp8IMl-Br4lmWOxZ-JHQ_hVFHr85v';
+const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
+
+const ERRORS = {
+  BAD_PIN: 'الرمز السري غير صحيح', ROOM_NOT_FOUND: 'لا توجد ساحة بهذا الرمز', BAD_PIN_FORMAT: 'الرمز السري من 4 أرقام على الأقل',
+  EMPTY: 'اكتب النص أولًا', EMPTY_NAME: 'اكتب اسمك أولًا', NOT_JOINED: 'انتهت مشاركتك، ادخل من جديد',
+  WRONG_PHASE: 'هذه الخطوة غير متاحة الآن', BAD_ROLE: 'اختر دورك', ROOM_FULL: 'الساحة ممتلئة',
+  ROLE_FULL: 'اكتمل عدد هذا الدور، اختر الدور الآخر', NO_ANSWERS: 'لا توجد إجابات مكتوبة للتصويت عليها', BAD_IMAGE: 'تعذر رفع الصورة، جرّب صورة أصغر'
+};
+const REASONS = {
+  locked: 'لوحة الأسئلة مقفلة الآن', tile_taken: 'هذا المربع مستخدم، اختر غيره', not_asker: 'كتابة الأسئلة للسائلين فقط',
+  not_answerer: 'الالتقاط للمجيبين فقط', late: 'سبقك زملاؤك في الالتقاط!', not_allowed: 'ليس دورك الآن',
+  already_sent: 'أرسلت إجابتك من قبل', vote_closed: 'انتهى وقت التصويت', own_answer: 'لا يمكنك التصويت لإجابتك', prep_closed: 'انتهى وقت التحضير'
+};
+const ROLE = { asker: 'سائل', answerer: 'مجيب' };
+const cap = () => (S.room && S.room.role_cap) || 8;
+const roleCount = role => S.players.filter(p => p.role === role).length;
+const TM = () => !!(S.room && S.room.mode === 'teacher');
+const LM = () => !!(S.room && S.room.mode === 'lesson');
+const MODES = [['peer', '🎯', 'السائل والمجيب', 'الطلاب يسألون ويجيبون على لوحة 16 مربعًا'], ['teacher', '🎤', 'المعلم يسأل', 'الجميع مجيبون، يلتقط السؤال ثلاثة، ومعه تصويت'], ['lesson', '📖', 'شرح الدرس', 'صورة الدرس، ثم تحضير الأسئلة والأجوبة، ثم التحدي']];
+const roleDesc = (role, short) => LM()
+  ? (role === 'asker' ? (short ? '+1 لأسرع طرح و+1 للسؤال الصحيح' : 'تجهّز أسئلة من الدرس، +1 لأسرع طرح و+1 للسؤال الصحيح') : (short ? '+2 لكل إجابة صحيحة' : 'تجهّز إجابات من الدرس وتلتقط الأسئلة، +2 للصحيحة'))
+  : (role === 'asker' ? (short ? '+1 لكل سؤال صحيح' : 'تكتب الأسئلة، ونقطة لكل سؤال يعتمده المعلم') : (short ? '+2 لكل إجابة صحيحة' : 'تلتقط الأسئلة، ونقطتان لكل إجابة صحيحة'));
+
+const S = { mode: null, code: null, room: null, players: [], all: [], pin: null, me: null, offset: 0, channel: null, keys: {}, lastSig: null, tickAt: 0, bumps: {}, scoreMap: null, sel: new Set(), selAt: null, newMode: 'peer', img: { ver: 0, data: null }, ink: { key: null, strokes: [] }, tool: 'pen', color: '#d0525a', prep: null };
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LS = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+S.mute = !!LS.get('qa2_mute');
+const pname = id => (S.all.find(p => p.id === id) || {}).name || '';
+const now = () => Date.now() + S.offset;
+const baseUrl = () => location.origin + location.pathname;
+const studentLink = () => baseUrl() + '?code=' + S.code;
+const boardLink = () => baseUrl() + '?code=' + S.code + '&view=board';
+const fmt = s => s == null ? '--:--' : String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+const sc = n => n < 0 ? '−' + Math.abs(n) : String(n);
+const secsLeft = t => t ? Math.max(0, Math.ceil((new Date(t).getTime() - now()) / 1000)) : null;
+
+function toast(msg, kind) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast' + (kind ? ' ' + kind : ''); t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2800);
+}
+function errText(e) {
+  const m = (e && (e.message || e.error_description)) || String(e);
+  for (const k in ERRORS) if (m.includes(k)) return ERRORS[k];
+  return 'تعذر الاتصال، حاول مرة أخرى';
+}
+async function rpc(fn, args) { const { data, error } = await sb.rpc(fn, args); if (error) throw error; return data; }
+async function syncClock() {
+  try { const t0 = Date.now(); const d = await rpc('qa2_tick', { p_code: S.code || '0000' }); const t1 = Date.now(); S.offset = new Date(d.now).getTime() - (t0 + t1) / 2; } catch {}
+}
+
+/* ---------- الصوت ---------- */
+let audio = null;
+function tone(freqs, dur = .16, gap = .05, vol = .16, type = 'sine') {
+  if (S.mute) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    let t = audio.currentTime;
+    freqs.forEach(f => {
+      const o = audio.createOscillator(), g = audio.createGain(); o.type = type;
+      o.frequency.value = f; o.connect(g); g.connect(audio.destination);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+      o.start(t); o.stop(t + dur + .02); t += dur + gap;
+    });
+  } catch {}
+}
+const SFX = {
+  tap: () => tone([520], .05, 0, .05),
+  open: () => tone([523, 659, 784], .14, .03),
+  capture: () => tone([880, 1175], .1, .02, .14, 'triangle'),
+  ok: () => tone([523, 659, 784, 1046], .12, .03),
+  plus: () => tone([659, 988, 1319], .1, .02, .15),
+  minus: () => tone([392, 294], .2, .04, .13, 'triangle'),
+  bad: () => tone([330, 247], .2, .04, .13, 'triangle'),
+  vote: () => tone([740, 988], .08, .02, .1),
+  voteOpen: () => tone([587, 740, 880, 740], .1, .02, .12),
+  tick: () => tone([1000], .04, 0, .05),
+  end: () => tone([523, 659, 784, 1046, 784, 1046], .14)
+};
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+function floatDelta(d) {
+  const el = document.createElement('div'); el.className = 'delta ltr ' + (d > 0 ? 'up' : 'down');
+  el.textContent = d > 0 ? '+' + d : sc(d); document.body.appendChild(el); setTimeout(() => el.remove(), 1800);
+}
+function scoreFx(diffs) {
+  if (!diffs.length || !S.room || S.room.phase === 'lobby') return;
+  if (S.mode === 'student') {
+    const mine = diffs.find(x => S.me && x.id === S.me.player_id); if (!mine) return;
+    floatDelta(mine.d); mine.d > 0 ? SFX.plus() : SFX.minus(); buzz(mine.d > 0 ? [40, 30, 40] : 200);
+  } else diffs.some(x => x.d > 0) ? SFX.plus() : SFX.minus();
+}
+document.addEventListener('pointerdown', () => { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch {} }, { once: true });
+
+/* ---------- البيانات اللحظية ---------- */
+async function loadRoom(code) {
+  const { data, error } = await sb.from('qa2_rooms').select('*').eq('code', code).maybeSingle();
+  if (error) throw error; return data;
+}
+async function refresh(what = 'all') {
+  if (!S.room) return;
+  const id = S.room.id, jobs = [];
+  if (what !== 'players') jobs.push(sb.from('qa2_rooms').select('*').eq('id', id).maybeSingle().then(r => { if (r.data) { S.room = r.data; loadImg(); } }));
+  if (what !== 'room') jobs.push(sb.from('qa2_players').select('id,name,role,score,kicked,last_seen,created_at,prep').eq('room_id', id).order('created_at').then(r => {
+    if (!r.data) return;
+    const old = S.scoreMap, diffs = []; S.scoreMap = {};
+    r.data.forEach(p => { S.scoreMap[p.id] = p.score; const d = old && old[p.id] != null ? p.score - old[p.id] : 0; if (d) { diffs.push({ id: p.id, d }); S.bumps[p.id] = { d, at: Date.now() }; } });
+    S.all = r.data; S.players = r.data.filter(p => !p.kicked); scoreFx(diffs);
+  }));
+  await Promise.all(jobs);
+  update();
+}
+const pend = {};
+function soon(w) { clearTimeout(pend[w]); pend[w] = setTimeout(() => refresh(w), 100); }
+function subscribe() {
+  if (S.channel) sb.removeChannel(S.channel);
+  const id = S.room.id;
+  S.channel = sb.channel('qa2-' + id)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'qa2_rooms', filter: 'id=eq.' + id }, () => soon('room'))
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'qa2_players', filter: 'room_id=eq.' + id }, () => soon('players'))
+    .subscribe(st => { if (st === 'SUBSCRIBED') refresh('all'); });
+  clearInterval(subscribe.poll); subscribe.poll = setInterval(() => refresh('all'), 7000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.room) { syncClock(); refresh('all'); } });
+
+/* ---------- الساعة والانتقالات التلقائية ---------- */
+function phaseTimer() {
+  const r = S.room; if (!r) return { left: null };
+  const total = { answer: r.answer_secs, t_answer: r.answer_secs, t_vote: r.vote_secs, l_prep: r.prep_min * 60 }[r.phase] || r.capture_secs;
+  if (r.phase_ends_at) return { left: secsLeft(r.phase_ends_at), total };
+  if (r.phase_paused_left != null) return { left: r.phase_paused_left, total, paused: true };
+  return { left: null };
+}
+function challengeLeft() {
+  const r = S.room; if (!r) return null;
+  if (r.challenge_ends_at) return secsLeft(r.challenge_ends_at);
+  return r.challenge_paused_left;
+}
+function tick() {
+  const r = S.room; if (!r) return;
+  const pt = phaseTimer(), cl = challengeLeft();
+  document.querySelectorAll('[data-ring]').forEach(el => {
+    const pct = pt.left == null ? 0 : Math.max(0, Math.min(100, pt.left / (pt.total || 30) * 100));
+    el.style.setProperty('--p', pct.toFixed(1));
+    el.classList.toggle('low', pt.left != null && pt.left <= 10);
+    const txt = String(pt.left == null ? '—' : pt.total > 99 ? fmt(pt.left) : pt.left);
+    el.firstElementChild.textContent = txt; el.firstElementChild.style.fontSize = txt.length > 3 ? '25px' : '';
+  });
+  document.querySelectorAll('[data-pstate]').forEach(el => el.textContent = pt.paused ? 'الوقت متوقف' : '');
+  document.querySelectorAll('[data-cclock]').forEach(el => {
+    el.querySelector('b').textContent = r.phase === 'lobby' ? fmt(r.duration_min * 60) : fmt(cl);
+    el.classList.toggle('low', cl != null && cl <= 60 && r.phase !== 'lobby');
+    const s = el.querySelector('small'); if (s) s.textContent = r.challenge_paused_left != null && !['ended', 'lobby', 'l_prep'].includes(r.phase) ? 'متوقف' : 'وقت التحدي';
+  });
+  if (document.querySelector('[data-ring]') && pt.left != null && !pt.paused && pt.left > 0 && pt.left <= 5) { if (S.lastTick !== pt.left) { S.lastTick = pt.left; SFX.tick(); } }
+  else S.lastTick = null;
+  const due = (['capture', 'answer', 't_capture', 't_answer', 't_vote', 'l_prep'].includes(r.phase) && r.phase_ends_at && now() >= new Date(r.phase_ends_at).getTime() + 300)
+    || (r.challenge_ends_at && now() >= new Date(r.challenge_ends_at).getTime() + 300 && ['board', 't_compose', 't_result'].includes(r.phase));
+  if (due && Date.now() - S.tickAt > 2000) { S.tickAt = Date.now(); rpc('qa2_tick', { p_code: r.code }).then(() => refresh('all')).catch(() => {}); }
+}
+setInterval(tick, 250);
+
+/* ---------- التوجيه ---------- */
+const params = new URLSearchParams(location.search);
+function go(q) { history.replaceState(null, '', baseUrl() + (q ? '?' + q : '')); }
+async function boot() {
+  const code = params.get('code'), view = params.get('view'), t = params.get('t');
+  if (code) S.code = code;
+  syncClock();
+  if (code && view === 'board') return startBoard(code);
+  if (code) return startStudent(code);
+  if (t) { const s = LS.get('qa2_teacher'); if (s && s.code === t) return startTeacher(s.code, s.pin); return teacherEntry(t); }
+  renderHome();
+}
+function renderHome() {
+  const saved = LS.get('qa2_teacher');
+  $('#app').innerHTML = `
+    <header class="hero">
+      <div class="logo">ساحة <span class="q">التحدي</span> <span class="a">المعرفي</span></div>
+      <p>تحدٍّ صفي بقسمين: طلاب يسألون وزملاؤهم يلتقطون، أو معلم يسأل والجميع يتسابقون على الإجابة.</p>
+    </header>
+    <div class="choices">
+      <button class="choice" data-act="home-teacher"><span class="ic bob">🧑‍🏫</span><b>أنا المعلم</b><span>أنشئ تحديًا، وحدد مدته، واحكم على الأسئلة والإجابات.</span></button>
+      <button class="choice" data-act="home-student"><span class="ic bob" style="animation-delay:.4s">🎒</span><b>أنا طالب</b><span>ادخل برمز الساحة وابدأ التحدي مع زملائك.</span></button>
+    </div>
+    ${saved ? `<p class="center" style="margin-top:16px"><button class="ghost" data-act="resume-teacher">متابعة تحديي (${esc(saved.code)})</button></p>` : ''}
+    <section class="panel rules">
+      <h3><span class="ic">🎯</span> القسم الأول: السائل والمجيب</h3>
+      <ol>
+        <li>يختار كل طالب دوره: <b style="color:var(--gold-t)">سائل</b> أو <b style="color:var(--cyan-t)">مجيب</b>، ثم يبدأ المعلم التحدي.</li>
+        <li>أمام الجميع 16 مربعًا: الصف العلوي للأسئلة، والسفلي للأجوبة.</li>
+        <li>يختار السائل مربعًا ويكتب سؤاله، فتُقفل لوحة الأسئلة أمام البقية.</li>
+        <li>إذا اعتمد المعلم السؤال يحصل السائل على <b>نقطة</b>، ويظهر السؤال كبيرًا للجميع.</li>
+        <li>للمجيبين 30 ثانية للالتقاط، وأسرع من يضغط يجيب خلال الوقت المحدد.</li>
+        <li>الإجابة الصحيحة <b>+2</b>، وعدم الإجابة في الوقت <b>−1</b>، وإن لم يلتقطه أحد تعود لوحة الأسئلة.</li>
+        <li>عند انتهاء مدة التحدي يُعلن بطل السائلين وبطل المجيبين.</li>
+      </ol>
+      <h3 style="margin-top:14px"><span class="ic">🎤</span> القسم الثاني: المعلم يسأل</h3>
+      <ol>
+        <li>يطرح المعلم السؤال، وكل الطلاب مجيبون.</li>
+        <li>أسرع ثلاثة طلاب يلتقطون السؤال، ويكتب كل منهم إجابته.</li>
+        <li>الإجابة الصحيحة <b>+3</b>، وأسرع إجابة صحيحة تنال <b>+1</b> إضافية.</li>
+        <li>من يلتقط السؤال ولا يجيب في الوقت <b>−1</b>.</li>
+        <li>أو يطرح المعلم الإجابات لتصويت الزملاء، فتنال الأكثر أصواتًا النقاط، ويُغلق التصويت بانتهاء وقته.</li>
+      </ol>
+      <h3 style="margin-top:14px"><span class="ic">📖</span> القسم الثالث: شرح الدرس</h3>
+      <ol>
+        <li>يرفع المعلم صورة الدرس، فيقرؤها الطلاب ويخططون عليها ويظللون، وما يرسمه كل طالب يظهر عنده وحده.</li>
+        <li>في وقت التحضير يكتب السائل أسئلته في مربعات، ويكتب المجيب إجاباته، ويمكن زيادة المربعات.</li>
+        <li>بعد انتهاء الوقت يبدأ التحدي: أسرع سائل يطرح سؤاله ينال <b>+1</b>، وإذا اعتمده المعلم <b>+1</b> أخرى.</li>
+        <li>أسرع مجيب يلتقط السؤال ويرسل إجابته الجاهزة بضغطة، والإجابة الصحيحة <b>+2</b>.</li>
+      </ol>
+    </section>`;
+}
+function renderStudentCode(msg) {
+  $('#app').innerHTML = `
+    <div class="form panel stack">
+      <h2>الدخول إلى الساحة</h2>
+      ${msg ? `<p class="muted">${esc(msg)}</p>` : ''}
+      <div><label for="in-code">رمز الساحة (4 أرقام)</label><input id="in-code" inputmode="numeric" maxlength="4" autocomplete="off" class="num" style="font-size:30px;letter-spacing:10px;text-align:center"></div>
+      <button class="gold" data-act="code-go">متابعة</button>
+      <button class="ghost" data-act="home">رجوع</button>
+    </div>`;
+  $('#in-code').focus();
+}
+function renderTeacherLogin(code) {
+  $('#app').innerHTML = `
+    <div class="form stack">
+      <div class="panel stack">
+        <h2>تحدٍّ جديد</h2>
+        <div><label for="in-title">اسم التحدي أو الدرس</label><input id="in-title" maxlength="60" value="ساحة التحدي المعرفي"></div>
+        <div><label>نوع التحدي</label>${modeCards(S.newMode, 'mode-pick')}</div>
+        <div class="grid2">
+          <div><label for="in-dur">مدة التحدي (دقيقة)</label><input id="in-dur" type="number" min="1" max="180" value="15"></div>
+          <div><label for="in-cap">وقت الالتقاط (ث)</label><input id="in-cap" type="number" min="5" max="300" value="30"></div>
+        </div>
+        <div class="grid2">
+          <div><label for="in-ans">وقت الإجابة بعد الالتقاط (ث)</label><input id="in-ans" type="number" min="5" max="300" value="30"></div>
+          <div id="vote-wrap" ${S.newMode === 'teacher' ? '' : 'hidden'}><label for="in-vote">وقت التصويت (ث)</label><input id="in-vote" type="number" min="5" max="300" value="20"></div>
+          <div id="prep-wrap" ${S.newMode === 'lesson' ? '' : 'hidden'}><label for="in-prep">وقت التحضير (دقيقة)</label><input id="in-prep" type="number" min="1" max="60" value="5"></div>
+        </div>
+        <button class="gold" data-act="create">إنشاء التحدي</button>
+      </div>
+      <div class="panel stack">
+        <h3>الرجوع إلى تحدٍّ موجود</h3>
+        <input id="in-rcode" placeholder="رمز الساحة (4 أرقام)" inputmode="numeric" maxlength="4" value="${esc(code || '')}">
+        <button data-act="resume-login">دخول</button>
+      </div>
+      <button class="ghost" data-act="home">رجوع</button>
+      <p class="center muted" style="margin:0;font-size:13px">الإصدار 5</p>
+    </div>`;
+}
+function modeCards(cur, a) {
+  const big = a === 'mode-pick';
+  return `<div class="modes" ${big ? 'id="modes"' : ''}>${MODES.map(([m, ic, t, d], k) => `<button class="modecard ${cur === m ? 'on' : ''}" data-act="${a}" data-mode="${m}"><span class="ic ${big ? 'bob' : ''}" style="animation-delay:${k * .3}s">${ic}</span><b>${t}</b>${big ? `<span>${d}</span>` : ''}</button>`).join('')}</div>`;
+}
+async function teacherEntry(code) {
+  const m = LS.get('qa2_master');
+  if (m) { try { if (await rpc('qa2_check_master', { p_pin: m })) return renderTeacherLogin(code); } catch {} LS.del('qa2_master'); }
+  S.gateCode = code || '';
+  $('#app').innerHTML = `
+    <div class="form panel stack center">
+      <div style="font-size:44px">🔒</div>
+      <h2>صفحة المعلم</h2>
+      <p class="muted" style="margin:0">أدخل الرقم السري للمعلم للمتابعة.</p>
+      <input id="in-master" type="password" inputmode="numeric" maxlength="20" autocomplete="off" class="num" style="font-size:26px;letter-spacing:6px;text-align:center">
+      <button class="gold" data-act="gate">دخول</button>
+      <button class="ghost" data-act="home">رجوع</button>
+    </div>`;
+  $('#in-master').focus();
+}
+
+/* ---------- قطع مشتركة ---------- */
+function hud(extra = '') {
+  return `<div class="hud">
+    <h2 id="h-title"></h2>
+    <div class="row">
+      ${extra}
+      ${document.fullscreenEnabled ? '<button class="ghost sm mute" data-act="fs" aria-label="ملء الشاشة" title="ملء الشاشة">⛶</button>' : ''}
+      <button class="ghost sm mute" data-act="mute" aria-label="تشغيل الصوت أو كتمه">${S.mute ? '🔇' : '🔊'}</button>
+      <div class="bigclock" data-cclock><small>وقت التحدي</small><b>--:--</b></div>
+      <div class="code"><small>رمز الدخول</small><b id="h-code"></b></div>
+    </div>
+  </div>`;
+}
+function tileStatusText(t) {
+  return { review: 'قيد المراجعة', open: 'متاح للالتقاط', answering: 'يجيب الآن', judging: 'بانتظار الحكم', missed: 'لم يُلتقط', timeout: 'لم يُجب', cancelled: 'أُلغي' }[t.status] || '';
+}
+function renderBoard(viewer) {
+  const r = S.room; const tiles = Array.isArray(r.tiles) ? r.tiles : [];
+  const canAsk = viewer === 'student' && S.mePlayer && S.mePlayer.role === 'asker' && r.phase === 'board';
+  const showQ = t => viewer === 'teacher' || t.status !== 'review';
+  let top = '', bottom = '';
+  for (let i = 0; i < 8; i++) {
+    const t = tiles[i] || {}; const live = r.active_tile === i && !['board', 'ended', 'lobby'].includes(r.phase);
+    if (!t.q) {
+      top += `<div class="tile q-empty ${canAsk ? 'can' : ''}" ${canAsk ? `data-act="compose" data-tile="${i}" role="button" tabindex="0" aria-label="اكتب سؤالًا في المربع ${i + 1}"` : ''}>
+        <span class="n">${i + 1}</span><span class="t">${canAsk ? 'اضغط لكتابة سؤال' : ''}</span><span class="who">؟</span></div>`;
+    } else {
+      top += `<div class="tile q-full clickable ${['missed', 'cancelled', 'timeout'].includes(t.status) ? 'dim' : ''} ${live ? 'live' : ''}" data-act="view" data-tile="${i}">
+        ${(t.qpts || 0) + (t.qs || 0) ? `<span class="pt">+${(t.qpts || 0) + (t.qs || 0)}</span>` : ''}<span class="n">${i + 1}</span>
+        <span class="t">${showQ(t) ? esc(t.q) : 'سؤال قيد مراجعة المعلم'}</span><span class="who">${esc(pname(t.asker))}</span></div>`;
+    }
+    if (t.answerer) {
+      const cls = t.status === 'done' ? 'a-full' : (t.status === 'wrong' || t.status === 'timeout') ? 'a-wrong' : 'a-full';
+      const pt = t.apts != null ? `<span class="pt">${t.apts > 0 ? '+' : ''}${t.apts === -1 ? '−1' : t.apts}</span>` : '';
+      bottom += `<div class="tile ${cls} clickable ${live ? 'live' : ''}" data-act="view" data-tile="${i}">${pt}<span class="n">${i + 1}</span>
+        <span class="t">${t.a ? esc(t.a) : tileStatusText(t)}</span><span class="who">${esc(pname(t.answerer))}</span></div>`;
+    } else if (t.status === 'missed' || t.status === 'cancelled') {
+      bottom += `<div class="tile a-miss"><span class="n">${i + 1}</span><span class="t">${tileStatusText(t)}</span><span class="who"></span></div>`;
+    } else {
+      bottom += `<div class="tile a-empty ${live ? 'live' : ''}"><span class="n">${i + 1}</span><span class="t">${live && r.phase === 'capture' ? 'بانتظار الالتقاط' : ''}</span><span class="who"></span></div>`;
+    }
+  }
+  const locked = r.phase !== 'board';
+  return `<div class="board ${locked ? 'locked' : ''}">
+    <div class="rowlabel"><i style="background:var(--gold)"></i>لوحة الأسئلة ${locked && r.phase !== 'ended' ? '<span style="color:var(--hot)">· مقفلة حتى يُحسم السؤال الحالي</span>' : ''}<span style="margin-inline-start:auto">اللوحة ${r.board_no}</span></div>
+    ${top}
+    <div class="rowlabel"><i style="background:var(--cyan)"></i>لوحة الأجوبة</div>
+    ${bottom}
+  </div>`;
+}
+const ranked = L => L.slice().sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ar'));
+function leaderboard(highlight, manage) {
+  const cutoff = now() - 90000, tm = TM();
+  const col = (L, title, cls, count) => `<div><h3 class="${cls}">${title} <span class="muted ltr" style="font-size:15px">${count}</span></h3><ol>${L.map((p, i) => {
+      const b = S.bumps[p.id], bump = b && Date.now() - b.at < 2500 ? (b.d > 0 ? 'up' : 'down') : '';
+      const prep = LM() && S.room.phase === 'l_prep' ? `<span class="tag">📝 ${(p.prep || []).length}</span>` : '';
+      const inner = `<span class="r">${tm && i < 3 && p.score > 0 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><span class="nm">${esc(p.name)}</span>${prep}<span class="s ltr">${sc(p.score)}</span>`;
+      return `<li class="${p.id === highlight ? 'mine' : ''} ${bump} ${manage && new Date(p.last_seen).getTime() < cutoff ? 'idle' : ''}">${manage ? `<button data-act="player" data-p="${p.id}">${inner}</button>` : inner}</li>`;
+    }).join('') || '<li class="muted" style="font-weight:400">لا أحد بعد</li>'}</ol></div>`;
+  if (tm) return `<div class="lb one">${col(ranked(S.players), '<span class="ic">🏆</span> الترتيب', '', S.players.length)}</div>`;
+  const list = role => ranked(S.players.filter(p => p.role === role));
+  return `<div class="lb ${LM() && S.room.phase === 'l_prep' ? 'one' : ''}">${col(list('asker'), 'السائلون', 'gold-t', `${roleCount('asker')}/${cap()}`)}${col(list('answerer'), 'المجيبون', 'cyan-t', `${roleCount('answerer')}/${cap()}`)}</div>`;
+}
+function stageKey(extra) {
+  if (LM() && S.room.phase === 'l_prep') return JSON.stringify(['prep', S.room.img_ver, extra]);
+  if (TM()) return JSON.stringify([S.room.phase, S.room.tq, S.room.vote_secs, S.all.length, extra]);
+  const r = S.room, t = (r.tiles || [])[r.active_tile] || {};
+  return JSON.stringify([r.phase, r.active_tile, r.asker_id, r.answerer_id, t.q, t.a, t.status, S.all.length, extra]);
+}
+function ringHtml() { return `<div class="ring" data-ring><b>—</b></div>`; }
+function winners() {
+  const top = role => S.players.filter(p => p.role === role).sort((a, b) => b.score - a.score)[0];
+  return { asker: top('asker'), answerer: top('answerer') };
+}
+function endScreen(highlight) {
+  if (TM()) {
+    const [a, b, c] = ranked(S.players);
+    const ch = (p, n, cls) => `<div class="champ ${cls} p${n}"><div class="crown"><span class="ic ${n === 1 ? 'float' : 'bob'}">${['👑', '🥈', '🥉'][n - 1]}</span></div>
+      <div class="muted" style="font-weight:700">المركز ${['الأول', 'الثاني', 'الثالث'][n - 1]}</div><div class="nm">${p ? esc(p.name) : '—'}</div><div class="sc ltr">${p ? sc(p.score) : 0}</div><div class="muted">نقطة</div></div>`;
+    return `<div class="stack"><h1 class="center" style="font-size:clamp(34px,6vw,60px)">انتهى التحدي! <span class="ic pop">🎉</span></h1>
+      <div class="podium3">${ch(b, 2, 'n-c')}${ch(a, 1, 'gold-c')}${ch(c, 3, 'n-c')}</div>
+      <div class="panel">${leaderboard(highlight, false)}</div></div>`;
+  }
+  const w = winners();
+  const champ = (p, title, cls) => `<div class="champ ${cls}"><div class="crown"><span class="ic float">👑</span></div><div class="muted" style="font-weight:700">${title}</div>
+    <div class="nm">${p ? esc(p.name) : '—'}</div><div class="sc ltr">${p ? sc(p.score) : 0}</div><div class="muted">نقطة</div></div>`;
+  return `<div class="stack"><h1 class="center" style="font-size:clamp(34px,6vw,60px)">انتهى التحدي! <span class="ic pop">🎉</span></h1>
+    <div class="podium">${champ(w.asker, 'بطل السائلين', 'gold-c')}${champ(w.answerer, 'بطل المجيبين', 'cyan-c')}</div>
+    <div class="panel">${leaderboard(highlight, false)}</div></div>`;
+}
+
+/* ---------- احتفال ---------- */
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('#confetti'), x = c.getContext('2d'); c.hidden = false;
+  c.width = innerWidth; c.height = innerHeight;
+  const colors = ['#ecc56a', '#7cc7cf', '#e2717f', '#4aa77a', '#a3a9d6'];
+  const P = Array.from({ length: 160 }, () => ({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, s: 5 + Math.random() * 7, c: colors[Math.random() * 5 | 0], a: Math.random() * 6 }));
+  let f = 0;
+  (function step() {
+    x.clearRect(0, 0, c.width, c.height);
+    P.forEach(p => { p.x += p.vx; p.y += p.vy; p.a += .1; x.fillStyle = p.c; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore(); });
+    if (++f < 260) requestAnimationFrame(step); else { c.hidden = true; }
+  })();
+}
+function phaseSounds() {
+  const r = S.room; if (!r) return;
+  const tq = r.tq || {}, sig = { ph: r.phase, t: r.active_tile, q: tq.at, n: (tq.caps || []).length, v: Object.keys(tq.voters || {}).length };
+  const prev = S.lastSig; S.lastSig = sig;
+  if (!prev) return;
+  if (prev.ph !== sig.ph || prev.t !== sig.t || prev.q !== sig.q) {
+    if (r.phase === 'capture' || (r.phase === 't_capture' && prev.ph !== 't_capture')) { SFX.open(); buzz(200); }
+    else if ((r.phase === 'answer' && prev.ph === 'capture') || (r.phase === 't_answer' && sig.n > prev.n)) SFX.capture();
+    else if (r.phase === 't_vote') { SFX.voteOpen(); buzz(120); }
+    else if (r.phase === 't_compose' && prev.ph === 't_capture') { SFX.bad(); toast('لم يلتقط أحد السؤال'); }
+    else if (r.phase === 'board' && prev.ph === 'l_prep') { SFX.voteOpen(); buzz(150); toast('انتهى التحضير، بدأ التحدي!', 'win'); }
+    else if (r.phase === 'ended') { SFX.end(); confetti(); }
+  } else if (sig.n > prev.n) SFX.capture();
+  else if (sig.v > prev.v && S.mode !== 'student') SFX.vote();
+}
+
+/* ---------- قسم: شرح الدرس ---------- */
+const INK_COLORS = ['#f2c94c', '#d0525a', '#3d6fc2', '#3a9d6a', '#262b40'];
+const INK_TOOLS = [['pen', '✏️', 'قلم'], ['hl', '🖍️', 'تظليل'], ['line', '📏', 'خط'], ['er', '🧽', 'ممحاة'], ['hand', '✋', 'تحريك']];
+const myPrep = () => ((S.mePlayer && S.mePlayer.prep) || []).filter(x => x && x.trim());
+async function loadImg() {
+  const v = S.room && S.room.img_ver;
+  if (!v || v <= 0) { if (S.img.ver !== v) { S.img = { ver: v || 0, data: null }; update(); } return; }
+  if (S.img.ver === v || S.img.loading === v) return;
+  S.img.loading = v;
+  try {
+    const { data } = await sb.from('qa2_media').select('data').eq('room_id', S.room.id).maybeSingle();
+    S.img = { ver: v, data: data && /^data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+$/.test(data.data) ? data.data : null };
+  } catch { S.img.loading = null; return; }
+  update();
+}
+function inkLoad() { const k = 'qa2_ink_' + S.code + '_' + S.img.ver; if (S.ink.key !== k) S.ink = { key: k, strokes: LS.get(k) || [] }; }
+function inkSave() { LS.set(S.ink.key, S.ink.strokes); }
+function inkDraw(cv) {
+  const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+  const dpr = devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  for (const s of S.ink.strokes) {
+    x.save(); x.lineCap = x.lineJoin = 'round';
+    x.globalCompositeOperation = s.t === 'er' ? 'destination-out' : 'source-over';
+    x.globalAlpha = s.t === 'hl' ? .38 : 1; x.strokeStyle = s.c; x.lineWidth = s.w * w / 1000;
+    x.beginPath(); s.p.forEach(([a, b], i) => i ? x.lineTo(a * w, b * h) : x.moveTo(a * w, b * h));
+    if (s.p.length === 1) x.lineTo(s.p[0][0] * w + .1, s.p[0][1] * h);
+    x.stroke(); x.restore();
+  }
+}
+function inkDrawAll() { document.querySelectorAll('canvas.ink').forEach(inkDraw); }
+window.addEventListener('resize', () => { clearTimeout(inkDrawAll.h); inkDrawAll.h = setTimeout(inkDrawAll, 120); });
+document.addEventListener('pointerdown', e => {
+  const cv = e.target.closest && e.target.closest('canvas.ink'); if (!cv || S.tool === 'hand') return;
+  e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch {}
+  const pt = ev => { const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width, (ev.clientY - r.top) / r.height].map(v => +Math.max(0, Math.min(1, v)).toFixed(4)); };
+  const s = { t: S.tool, c: S.color, w: { pen: 3.5, hl: 24, line: 3.5, er: 30 }[S.tool], p: [pt(e)] };
+  S.ink.strokes.push(s); inkDraw(cv);
+  const move = ev => { if (s.t === 'line') s.p[1] = pt(ev); else s.p.push(pt(ev)); inkDraw(cv); };
+  const up = () => { cv.removeEventListener('pointermove', move); cv.removeEventListener('pointerup', up); cv.removeEventListener('pointercancel', up); inkSave(); };
+  cv.addEventListener('pointermove', move); cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+});
+/* لوحة صورة الدرس: ink = أدوات الرسم الخاصة بهذا الجهاز */
+function imgPanel(el, ink) {
+  if (!el) return;
+  const has = S.img.ver > 0 && S.img.data && S.room.img_ver === S.img.ver;
+  const key = (has ? S.img.ver : 0) + ':' + ink;
+  if (el.dataset.k === key) return; el.dataset.k = key;
+  if (!has) { el.innerHTML = ''; return; }
+  inkLoad();
+  const tools = ink ? INK_TOOLS.map(([t, ic, n]) => `<button class="sm tool ${S.tool === t ? 'on' : ''}" data-act="tool" data-tool="${t}" title="${n}" aria-label="${n}">${ic}</button>`).join('')
+    + INK_COLORS.map(c => `<button class="sw ${S.color === c ? 'on' : ''}" data-act="ink-color" data-c="${c}" style="background:${c}" aria-label="لون"></button>`).join('')
+    + `<button class="sm" data-act="ink-undo" title="تراجع" aria-label="تراجع">↩️</button><button class="sm" data-act="ink-clear" title="مسح الكل" aria-label="مسح الكل">🗑️</button>` : '';
+  el.innerHTML = `<div class="panel inkp" id="inkp"><div class="row between" style="margin-bottom:10px"><h3 style="font-size:22px"><span class="ic bob">📖</span> صورة الدرس</h3>
+    <div class="row inktools">${tools}<button class="sm ghost" data-act="ink-full" title="تكبير" aria-label="تكبير الصورة">⛶</button></div></div>
+    <div class="inkstage"><div class="inkwrap ${!ink || S.tool === 'hand' ? 'hand' : ''}"><img src="${S.img.data}" alt="صورة الدرس" onload="inkDrawAll()" draggable="false">${ink ? '<canvas class="ink"></canvas>' : ''}</div></div>
+    ${ink ? '<p class="muted center" style="margin:8px 0 0;font-size:13px">ملاحظاتك وتظليلك تظهر على جهازك أنت فقط.</p>' : ''}</div>`;
+}
+const imgCtl = () => `<div class="row"><button class="${S.room.img_ver > 0 ? '' : 'gold'}" data-act="img-pick"><span class="ic">🖼️</span> ${S.room.img_ver > 0 ? 'تغيير صورة الدرس' : 'رفع صورة الدرس'}</button>
+  ${S.room.img_ver > 0 ? '<button class="ghost sm" data-act="img-del">حذف الصورة</button>' : ''}<input type="file" id="img-file" accept="image/*" hidden></div>`;
+async function uploadImage(file) {
+  if (!file || !/^image\//.test(file.type)) return toast('اختر ملف صورة', 'err');
+  toast('جارٍ تجهيز الصورة…');
+  try {
+    const url = URL.createObjectURL(file), im = new Image();
+    await new Promise((ok, no) => { im.onload = ok; im.onerror = no; im.src = url; });
+    const k = Math.min(1, 1800 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h); URL.revokeObjectURL(url);
+    let q = .85, data = c.toDataURL('image/jpeg', q);
+    while (data.length > 2500000 && q > .4) { q -= .15; data = c.toDataURL('image/jpeg', q); }
+    if (await act('set_image', { data })) { toast('تم رفع صورة الدرس', 'win'); SFX.ok(); }
+  } catch { toast('تعذر قراءة الصورة', 'err'); }
+}
+function lTeacherPrep() {
+  return `<div class="stage stack"><div class="row between"><div><div class="kicker"><span class="ic bob">📝</span> وقت التحضير</div>
+      <h3 style="font-size:clamp(22px,2.4vw,30px)">الطلاب يقرؤون صورة الدرس ويجهّزون الأسئلة والإجابات</h3>
+      <p class="muted" style="margin:0">يظهر بجانب كل اسم عدد ما جهّزه 📝، واضغط الاسم لترى ما كتبه. وقت التحدي يبدأ بعد التحضير.</p></div>${ringHtml()}</div>
+    <div class="center muted" data-pstate></div>
+    <div class="row" style="justify-content:center"><button class="sm" data-act="t-pause">إيقاف</button><button class="sm" data-act="t-resume">استئناف</button>
+      <button class="sm" data-act="t-add" data-s="60">+1 د</button><button class="sm" data-act="t-add" data-s="-60">−1 د</button></div>
+    <button class="gold" data-act="end-prep" style="min-height:60px;font-size:20px"><span class="ic bob">🚀</span> إنهاء التحضير وبدء التحدي</button>
+    ${imgCtl()}</div>`;
+}
+function prepRows(asker) {
+  return S.prep.map((v, i) => `<div class="prepbox"><span class="no">${i + 1}</span><textarea data-prep="${i}" maxlength="300" rows="2" placeholder="${asker ? 'سؤال' : 'إجابة'} ${i + 1}" aria-label="${asker ? 'سؤال' : 'إجابة'} ${i + 1}">${esc(v)}</textarea>
+    <button class="ghost sm" data-act="prep-del" data-i="${i}" aria-label="حذف المربع">✕</button></div>`).join('');
+}
+function lPrepStage(me) {
+  const asker = me.role === 'asker';
+  if (!S.prep) { const p = (me.prep || []).slice(); S.prep = p.length ? p : ['', '', '']; }
+  return `<div class="stage stack"><div class="row between"><div class="kicker"><span class="ic bob">📝</span> وقت التحضير · ${asker ? 'جهّز أسئلتك' : 'جهّز إجاباتك'}</div>${ringHtml()}</div>
+    <p class="muted" style="margin:0">${asker ? 'اقرأ صورة الدرس واكتب أسئلتك، كل سؤال في مربع. عند بدء التحدي اطرح سؤالك بسرعة: +1 لأسرع طرح، و+1 إذا اعتمده المعلم.'
+      : 'اقرأ صورة الدرس واكتب إجابات تتوقع أن تُسأل عنها. في التحدي التقط السؤال وأرسل إجابتك الجاهزة بضغطة: +2 للإجابة الصحيحة.'}</p>
+    <div class="center muted" data-pstate></div>
+    <div class="prep" id="prep-list">${prepRows(asker)}</div>
+    <div class="row between"><button data-act="prep-add">+ مربع جديد</button><span class="muted" id="prep-state" style="font-weight:700;font-size:14px"></span></div></div>`;
+}
+function savePrep() {
+  clearTimeout(savePrep.h); const st = $('#prep-state'); if (st) st.textContent = 'جارٍ الحفظ…';
+  savePrep.h = setTimeout(async () => {
+    let msg = '✓ محفوظ';
+    try { const d = await rpc('qa2_student', { p_token: S.me.token, p_action: 'prep_save', p_args: { items: S.prep.map(x => x.trim()).filter(Boolean) } }); if (d && d.ok === false) msg = 'انتهى وقت التحضير'; }
+    catch { msg = 'تعذر الحفظ، تحقق من الاتصال'; }
+    const el = $('#prep-state'); if (el) el.textContent = msg;
+  }, 700);
+}
+document.addEventListener('input', e => { const i = e.target.dataset && e.target.dataset.prep; if (i != null && S.prep) { S.prep[+i] = e.target.value; savePrep(); } });
+document.addEventListener('change', e => { if (e.target.id === 'img-file') { uploadImage(e.target.files[0]); e.target.value = ''; } });
+function prepPicker(kind) {
+  const items = myPrep(), ask = kind === 'ask';
+  if (!items.length) return kind === 'preview' ? '' : `<p class="muted center" style="margin:0">لم تجهّز ${ask ? 'أسئلة' : 'إجابات'}، ${ask ? 'اضغط مربعًا فارغًا واكتب سؤالك' : 'اكتب إجابتك هنا'}.</p>`;
+  const used = ask ? new Set((S.room.tiles || []).filter(t => t.asker === S.me.player_id).map(t => t.q)) : new Set();
+  return `<div class="stack" style="gap:8px;text-align:right"><div class="kicker">${ask ? 'أسئلتك الجاهزة' : 'إجاباتك الجاهزة'}</div><div class="ready">${items.map((t, i) => {
+    if (kind === 'preview') return `<div class="chip"><span class="tx">${esc(t)}</span></div>`;
+    const u = used.has(t.trim().slice(0, 300));
+    return `<button class="chip ${u ? 'used' : ''}" data-act="${ask ? 'prep-ask' : 'prep-ans'}" data-i="${i}" ${u ? 'disabled' : ''}><span class="tx">${esc(t)}</span><b>${u ? '✓ طُرح' : ask ? '🚀 اطرح' : '📤 أرسل'}</b></button>`;
+  }).join('')}</div></div>`;
+}
+function lBoardPrep() {
+  return `<div class="stage stack center"><div class="row" style="justify-content:center;gap:24px"><div class="bigicon"><span class="ic bob">📝</span></div>
+    <div><h2 style="font-size:clamp(30px,4.5vw,56px)">وقت التحضير</h2><p class="muted" style="margin:0;font-size:20px">اقرؤوا صورة الدرس، وجهّزوا الأسئلة والإجابات</p></div>${ringHtml()}</div>
+    <div class="center muted" data-pstate></div></div>`;
+}
+
+/* ---------- قسم: المعلم يسأل ---------- */
+function swap(el, html) {
+  const keep = {}, a = document.activeElement;
+  el.querySelectorAll('input[id],textarea[id]').forEach(x => keep[x.id] = x.value);
+  const f = a && el.contains(a) && a.id ? { id: a.id, s: a.selectionStart, e: a.selectionEnd } : null;
+  el.innerHTML = html;
+  for (const id in keep) { const x = el.querySelector('#' + id); if (x) x.value = keep[id]; }
+  if (f) { const x = el.querySelector('#' + f.id); if (x) { x.focus(); try { x.setSelectionRange(f.s, f.e); } catch {} } }
+}
+const capsOf = () => (S.room.tq && S.room.tq.caps) || [];
+function fastestIdx(caps, onlyOk) {
+  let k = -1; caps.forEach((c, i) => { if (c.a_at && (!onlyOk || c.ok) && (k < 0 || c.a_at < caps[k].a_at)) k = i; }); return k;
+}
+function slotsHtml(meId) {
+  const caps = capsOf(), first = fastestIdx(caps); let h = '';
+  for (let i = 0; i < 3; i++) {
+    const c = caps[i];
+    h += c ? `<div class="slot on ${c.id === meId ? 'me' : ''}"><span class="no">${i + 1}</span><span class="nm">${esc(pname(c.id))}</span>
+        <small>${c.a_at ? (i === first ? '<span class="ic beat">⚡</span> أول من أجاب' : 'أجاب ✓') : c.pts === -1 ? 'لم يُجب (−1)' : '<span class="ic spin">✍️</span> يكتب…'}</small></div>`
+      : `<div class="slot"><span class="no">${i + 1}</span><small>${S.room.phase === 't_capture' ? 'مكان شاغر' : '—'}</small></div>`;
+  }
+  return `<div class="slots">${h}</div>`;
+}
+/* how: judge | vote | live | show | result  ·  anon: إخفاء الأسماء أثناء التصويت */
+function answersHtml(how, meId, anon) {
+  const r = S.room, caps = capsOf(), voters = (r.tq && r.tq.voters) || {}, myVote = meId != null ? voters[meId] : undefined;
+  const total = Object.keys(voters).length, fast = fastestIdx(caps, how === 'result');
+  const rows = caps.map((c, i) => {
+    const has = c.a != null, cnt = c.votes != null ? c.votes : Object.values(voters).filter(v => +v === i).length;
+    const who = anon ? `إجابة ${i + 1}` : esc(pname(c.id));
+    const tags = (!anon && how !== 'judge' && i === fast && has ? '<span class="tag fast">⚡ الأسرع</span>' : '') + (c.id === meId ? '<span class="tag">إجابتك</span>' : '');
+    const body = `<span class="no">${i + 1}</span><span class="tx"><span class="by">${who} ${tags}</span>${has ? esc(c.a) : '<span class="muted" style="font-weight:500">لم يُجب في الوقت</span>'}</span>`;
+    const bar = `<span class="vbar"><i style="width:${total ? Math.round(cnt / total * 100) : 0}%"></i></span>`;
+    if (how === 'judge' && has) {
+      const on = S.sel.has(i);
+      return `<div class="ans pick ${on ? 'sel' : ''}" data-act="tsel" data-i="${i}" role="button" tabindex="0" aria-pressed="${on}">${body}<span class="side"><span class="ic ${on ? 'pop' : ''}">${on ? '✅' : '⬜'}</span>${on ? 'صحيحة' : 'صحّح'}</span></div>`;
+    }
+    if (how === 'vote' && has) {
+      const own = c.id === meId, mine = myVote != null && +myVote === i;
+      return `<button class="ans ${mine ? 'voted' : ''}" data-act="tvote" data-i="${i}" ${own ? 'disabled' : ''}>${body}<span class="side"><span class="ic ${mine ? 'pop' : ''}">${mine ? '🗳️' : own ? '🚫' : '👆'}</span>${mine ? 'صوتك' : own ? 'لا يُصوَّت لها' : 'صوّت'}</span></button>`;
+    }
+    if (how === 'live' && has) return `<div class="ans">${body}<span class="side"><span class="pts ltr">${cnt}</span>${bar}</span></div>`;
+    if (how === 'result') {
+      const p = c.pts || 0;
+      return `<div class="ans ${c.ok ? 'win' : 'lose'} ${c.id === meId ? 'mine' : ''}">${body}<span class="side"><span class="ic pop">${c.ok ? (c.fast ? '⚡' : '✅') : has ? '❌' : '⏰'}</span><span class="pts ltr">${p > 0 ? '+' + p : sc(p)}</span>${c.votes != null ? `<span>${c.votes} صوت</span>` : ''}</span></div>`;
+    }
+    return `<div class="ans ${c.id === meId ? 'mine' : ''}">${body}</div>`;
+  });
+  return `<div class="answers">${rows.join('') || '<p class="muted center" style="margin:0">لا توجد إجابات.</p>'}</div>`;
+}
+function tLog() {
+  const L = (S.room.tq_log || []).slice().reverse(); if (!L.length) return '';
+  return `<div class="panel" style="margin-top:14px"><h3 style="font-size:20px;margin-bottom:8px">الأسئلة السابقة <span class="muted num" style="font-size:15px">(${L.length})</span></h3><div class="log">${L.slice(0, 8).map(x => {
+    const w = (x.caps || []).filter(c => c.ok).map(c => `${esc(pname(c.id))} <span class="ltr">+${c.pts}</span>`).join('، ');
+    return `<div class="it"><div class="q">${esc(x.q)}</div><div class="w">${x.missed ? 'لم يلتقطه أحد' : w ? '🏅 ' + w : 'لا إجابة صحيحة'}${x.voted ? ' · بالتصويت' : ''}</div></div>`;
+  }).join('')}</div></div>`;
+}
+const tTimerCtl = () => `<div class="row" style="justify-content:center">
+    <button class="sm" data-act="t-pause">إيقاف</button><button class="sm" data-act="t-resume">استئناف</button>
+    <button class="sm" data-act="t-add" data-s="10">+10 ث</button><button class="sm" data-act="t-add" data-s="-10">−10 ث</button></div>`;
+const cCtl = () => `<div class="row" style="justify-content:center"><button class="sm" data-act="c-pause">إيقاف وقت التحدي</button><button class="sm" data-act="c-resume">استئناف</button>
+    <button class="sm" data-act="c-add" data-m="1">+1 د</button><button class="sm" data-act="c-add" data-m="-1">−1 د</button><button class="bad sm" data-act="ask-end">إنهاء التحدي</button></div>`;
+function tTeacherStage() {
+  const r = S.room, q = esc((r.tq || {}).q), caps = capsOf();
+  const compose = (label) => `<div><label for="t-q">${label}</label><textarea id="t-q" maxlength="400" placeholder="اكتب السؤال هنا ثم اطرحه على الطلاب"></textarea></div>
+    <button class="gold" data-act="t-ask" style="min-height:60px;font-size:21px"><span class="ic bob">🎤</span> اطرح السؤال</button>`;
+  const judgeCtl = `<div class="judge"><button class="ok" data-act="t-judge"><span class="ic">✅</span> اعتماد الحكم</button><button class="cyan" data-act="t-vote"><span class="ic wig">🗳️</span> طرح للتصويت</button></div>
+    <div class="row" style="justify-content:center"><label for="t-vs" style="margin:0">مدة التصويت (ث)</label><input id="t-vs" type="number" min="5" max="300" value="${r.vote_secs}" style="width:90px;min-height:40px;padding:6px 10px">
+    <button class="ghost sm" data-act="t-cancel">إلغاء السؤال</button></div>
+    <p class="muted center" style="margin:0;font-size:14px">اضغط الإجابات الصحيحة ثم «اعتماد الحكم»: +3 لكل صحيحة و+1 لأسرعها. أو اطرحها للتصويت فتنال الأكثر أصواتًا النقاط.</p>`;
+  if (r.phase === 't_compose') return `<div class="stage stack"><div class="kicker"><span class="ic bob">🎤</span> المعلم يسأل · الجميع مجيبون</div>${compose('اكتب سؤالك للطلاب')}${cCtl()}</div>`;
+  if (r.phase === 't_capture') return `<div class="stage stack">
+      <div class="row between"><div class="kicker" style="color:var(--hot)"><span class="ic beat">✋</span> الالتقاط مفتوح لثلاثة طلاب</div>${ringHtml()}</div>
+      <div class="bigq">${q}</div>${slotsHtml()}<div class="center muted" data-pstate></div>${tTimerCtl()}
+      <div class="row" style="justify-content:center"><button data-act="t-close-cap" ${caps.length ? '' : 'disabled'}>إغلاق الالتقاط والبدء بالإجابة</button><button class="ghost" data-act="t-cancel">إلغاء السؤال</button></div></div>`;
+  if (r.phase === 't_answer' || r.phase === 't_judge') return `<div class="stage stack">
+      <div class="row between"><div class="kicker">${r.phase === 't_answer' ? '<span class="ic spin">✍️</span> الملتقطون يكتبون إجاباتهم' : '<span class="ic wig">⚖️</span> احكم على الإجابات'}</div>${r.phase === 't_answer' ? ringHtml() : ''}</div>
+      <div class="bigq">${q}</div>${r.phase === 't_answer' ? slotsHtml() : ''}${answersHtml('judge')}${judgeCtl}
+      ${r.phase === 't_answer' ? `<div class="center muted" data-pstate></div>${tTimerCtl()}<p class="center" style="margin:0"><button class="sm" data-act="t-end-ans">إنهاء وقت الإجابة</button></p>` : ''}</div>`;
+  if (r.phase === 't_vote') {
+    const n = Object.keys((r.tq || {}).voters || {}).length;
+    return `<div class="stage stack">
+      <div class="row between"><div class="kicker"><span class="ic wig">🗳️</span> التصويت جارٍ · صوّت <span class="num">${n}</span> من ${S.players.length}</div>${ringHtml()}</div>
+      <div class="bigq">${q}</div>${answersHtml('live')}<div class="center muted" data-pstate></div>${tTimerCtl()}
+      <div class="row" style="justify-content:center"><button class="cyan" data-act="t-close-vote">إغلاق التصويت الآن</button><button class="ghost" data-act="t-cancel">إلغاء السؤال</button></div></div>`;
+  }
+  if (r.phase === 't_result') return `<div class="stage stack">
+      <div class="kicker"><span class="ic pop">🏅</span> النتيجة${(r.tq || {}).voters ? ' · بالتصويت' : ''}</div><div class="bigq" style="font-size:clamp(20px,3vw,32px)">${q}</div>
+      ${answersHtml('result')}<hr style="border:0;border-top:1px solid var(--line);width:100%;margin:4px 0">${compose('السؤال التالي')}${cCtl()}</div>`;
+  return '';
+}
+function tWatchStage(me, big) {
+  const r = S.room, q = esc((r.tq || {}).q), caps = capsOf(), meId = me && me.id;
+  const mine = caps.findIndex(c => c.id === meId), cap = caps[mine];
+  const h = big ? 'clamp(30px,5vw,56px)' : 'clamp(24px,5vw,38px)';
+  const answerBox = `<div class="center" style="font-weight:700;color:var(--cyan-t)"><span class="ic pop">🎯</span> التقطته! أنت رقم ${mine + 1}، اكتب إجابتك</div>
+    <textarea id="s-a" maxlength="300" placeholder="اكتب إجابتك هنا"></textarea><button class="cyan" data-act="t-send-a" style="min-height:58px;font-size:20px">إرسال الإجابة</button>`;
+  const sent = `<p class="center" style="margin:0;font-weight:700;color:var(--ok)"><span class="ic pop">✅</span> أُرسلت إجابتك. بانتظار حكم المعلم</p>`;
+  if (r.phase === 't_compose') {
+    const last = (r.tq_log || []).slice(-1)[0];
+    return `<div class="stage stack center"><div class="bigicon"><span class="ic float">🎤</span></div><h2 style="font-size:${h}">استعدوا! المعلم يجهّز السؤال</h2>
+      <p class="muted" style="margin:0">${last && last.missed ? 'لم يلتقط أحد السؤال السابق. ' : ''}كونوا أسرع من يلتقطه، فالملتقطون ثلاثة فقط.</p></div>`;
+  }
+  if (r.phase === 't_capture') {
+    let act = '';
+    if (me) act = cap ? (cap.a != null ? sent : answerBox) : caps.length < 3 ? `<button class="capture" data-act="t-capture"><span class="ic beat">✋</span> التقط!</button>` : '<p class="center muted" style="margin:0">اكتمل الملتقطون الثلاثة، تابع إجاباتهم.</p>';
+    return `<div class="stage stack"><div class="row between"><div class="kicker" style="color:var(--hot)${big ? ';font-size:20px' : ''}"><span class="ic beat">✋</span> التقطوا السؤال! ثلاثة أماكن فقط</div>${ringHtml()}</div>
+      <div class="bigq">${q}</div>${slotsHtml(meId)}<div class="center muted" data-pstate></div>${act}</div>`;
+  }
+  if (r.phase === 't_answer') return `<div class="stage stack"><div class="row between"><div class="kicker"${big ? ' style="font-size:20px"' : ''}><span class="ic spin">✍️</span> ${cap ? 'أجب قبل انتهاء الوقت' : 'الملتقطون يكتبون إجاباتهم'}</div>${ringHtml()}</div>
+      <div class="bigq">${q}</div>${slotsHtml(meId)}<div class="center muted" data-pstate></div>${cap ? (cap.a != null ? sent : answerBox) : ''}</div>`;
+  if (r.phase === 't_judge') return `<div class="stage stack"><div class="kicker"${big ? ' style="font-size:20px"' : ''}><span class="ic spin">⏳</span> المعلم يراجع الإجابات</div>
+      <div class="bigq">${q}</div>${answersHtml('show', meId)}</div>`;
+  if (r.phase === 't_vote') return `<div class="stage stack"><div class="row between"><div class="kicker"${big ? ' style="font-size:20px"' : ''}><span class="ic wig">🗳️</span> ${me ? 'صوّت لأفضل إجابة (يمكنك تغيير صوتك قبل انتهاء الوقت)' : 'صوّتوا لأفضل إجابة!'}</div>${ringHtml()}</div>
+      <div class="bigq">${q}</div>${answersHtml(me ? 'vote' : 'show', meId, true)}<div class="center muted" data-pstate></div></div>`;
+  if (r.phase === 't_result') {
+    const head = cap ? (cap.pts > 0 ? `<span class="ic pop">🎉</span> أحسنت! <span class="ltr">+${cap.pts}</span>` : cap.pts < 0 ? '<span class="ic pop">⏰</span> لم تُجب في الوقت' : '<span class="ic pop">💪</span> حظًا أوفر في السؤال القادم') : '<span class="ic pop">🏅</span> النتيجة';
+    return `<div class="stage stack"><h2 class="center" style="font-size:${h}">${head}</h2><div class="bigq" style="font-size:clamp(20px,3vw,32px)">${q}</div>${answersHtml('result', meId)}
+      <p class="center muted" style="margin:0">بانتظار السؤال التالي…</p></div>`;
+  }
+  return '';
+}
+
+/* ---------- المعلم ---------- */
+async function startTeacher(code, pin) {
+  try { await rpc('qa2_teacher', { p_code: code, p_pin: pin, p_action: 'auth', p_args: {} }); }
+  catch (e) { toast(errText(e), 'err'); LS.del('qa2_teacher'); return renderTeacherLogin(code); }
+  S.mode = 'teacher'; S.code = code; S.pin = pin; S.keys = {};
+  LS.set('qa2_teacher', { code, pin }); go('t=' + code);
+  S.room = await loadRoom(code);
+  $('#app').innerHTML = hud(`<button class="gold sm" data-act="share">رابط الطلاب و QR</button>
+      <a href="${esc(boardLink())}" target="_blank" rel="noopener" tabindex="-1"><button class="sm">شاشة العرض</button></a>
+      <button class="ghost sm" data-act="settings">الإعدادات</button>`) + `<div id="t-body"></div>`;
+  subscribe(); refresh('all');
+}
+async function act(action, args = {}) {
+  try { await rpc('qa2_teacher', { p_code: S.code, p_pin: S.pin, p_action: action, p_args: args }); await refresh('all'); return true; }
+  catch (e) { toast(errText(e), 'err'); return false; }
+}
+function teacherStage() {
+  const r = S.room, t = (r.tiles || [])[r.active_tile] || {};
+  const timerCtl = `<div class="row" style="justify-content:center">
+      <button class="sm" data-act="t-pause">إيقاف</button><button class="sm" data-act="t-resume">استئناف</button>
+      <button class="sm" data-act="t-add" data-s="10">+10 ث</button><button class="sm" data-act="t-add" data-s="-10">−10 ث</button></div>`;
+  if (r.phase === 'review') return `<div class="stage stack">
+      <div class="kicker">المربع ${r.active_tile + 1} · سؤال من <b style="color:var(--gold-t)">${esc(pname(r.asker_id))}</b> (لا يراه الطلاب حتى تعتمده)</div>
+      <div class="bigq">${esc(t.q)}</div>
+      <div class="judge"><button class="ok" data-act="approve">${LM() ? 'سؤال صحيح · +1 إضافية' : 'سؤال صحيح · +1 للسائل'}</button><button class="bad" data-act="reject">${LM() ? 'رفض السؤال (تُسحب نقطة السرعة)' : 'رفض السؤال'}</button></div></div>`;
+  if (r.phase === 'capture') return `<div class="stage stack">
+      <div class="row between"><div class="kicker">المربع ${r.active_tile + 1} · سؤال ${esc(pname(r.asker_id))} · <span style="color:var(--hot)">الالتقاط مفتوح للمجيبين</span></div>${ringHtml()}</div>
+      <div class="bigq">${esc(t.q)}</div><div class="center muted" data-pstate></div>${timerCtl}
+      <button class="ghost" data-act="cancel-q">إلغاء هذا السؤال</button></div>`;
+  if (r.phase === 'answer' || r.phase === 'judge') return `<div class="stage stack">
+      <div class="row between"><div class="kicker">المربع ${r.active_tile + 1} · التقطه <b style="color:var(--cyan-t)">${esc(pname(r.answerer_id))}</b></div>${r.phase === 'answer' ? ringHtml() : ''}</div>
+      <div class="bigq">${esc(t.q)}</div>
+      ${t.a ? `<div class="biga">${esc(t.a)}</div>` : `<div class="center muted">${r.phase === 'answer' ? 'يكتب الإجابة الآن… يمكنك الحكم مباشرة إذا أجاب شفهيًا.' : ''}</div><div class="center muted" data-pstate></div>`}
+      <div class="judge"><button class="ok" data-act="judge" data-v="1">إجابة صحيحة · +2</button><button class="bad" data-act="judge" data-v="0">إجابة خاطئة</button></div>
+      ${r.phase === 'answer' ? timerCtl : ''}<button class="ghost" data-act="cancel-q">إلغاء هذا السؤال</button></div>`;
+  if (r.phase === 'board') return `<div class="stage"><div class="row between"><div><div class="kicker">لوحة الأسئلة مفتوحة</div><h3 style="font-size:26px">${LM() ? 'من يطرح سؤاله أولًا؟ أسرع سائل ينال +1' : 'بانتظار أن يختار سائل مربعًا ويكتب سؤاله…'}</h3></div>
+      <div class="row"><button class="sm" data-act="c-pause">إيقاف وقت التحدي</button><button class="sm" data-act="c-resume">استئناف</button>
+      <button class="sm" data-act="c-add" data-m="1">+1 د</button><button class="sm" data-act="c-add" data-m="-1">−1 د</button>
+      <button class="sm" data-act="new-board">لوحة جديدة</button><button class="bad sm" data-act="ask-end">إنهاء التحدي</button></div></div></div>`;
+  return '';
+}
+function updateTeacher() {
+  const r = S.room; if (!r) return;
+  $('#h-title').textContent = r.title; $('#h-code').textContent = r.code;
+  const body = $('#t-body');
+  if (r.phase === 'lobby') {
+    const key = JSON.stringify(['lobby', S.players.map(p => p.id + p.role + p.name), r.duration_min, r.capture_secs, r.answer_secs, r.vote_secs, r.prep_min, r.mode, r.img_ver, S.img.ver]);
+    if (S.keys.body === key) return; S.keys.body = key;
+    const a = roleCount('asker'), b = roleCount('answerer'), tm = TM();
+    const modeSw = modeCards(r.mode, 'set-mode');
+    if (tm) {
+      swap(body, `<div class="layout"><div class="stack">
+      <div class="stage stack"><div class="kicker">نوع التحدي</div>${modeSw}
+        <h3 style="font-size:28px">انضم <span class="num">${S.players.length}</span> طالبًا · الجميع مجيبون</h3>
+        <p class="muted" style="margin:0">اعرض رمز الدخول أو QR. ستكتب السؤال، ويلتقطه أسرع ثلاثة طلاب.</p>
+        <div class="grid2"><div><label for="l-dur">مدة التحدي (دقيقة)</label><input id="l-dur" type="number" min="1" max="180" value="${r.duration_min}"></div>
+        <div><label for="l-cap">وقت الالتقاط / الإجابة (ث)</label><div class="grid2"><input id="l-cap" type="number" min="5" max="300" value="${r.capture_secs}" aria-label="وقت الالتقاط"><input id="l-ans" type="number" min="5" max="300" value="${r.answer_secs}" aria-label="وقت الإجابة"></div></div></div>
+        <div><label for="l-vote">وقت التصويت (ث)</label><input id="l-vote" type="number" min="5" max="300" value="${r.vote_secs}"></div>
+        <button class="gold" data-act="start" style="min-height:64px;font-size:22px" ${S.players.length ? '' : 'disabled'}><span class="ic bob">🚀</span> ابدأ التحدي</button>
+        ${S.players.length ? '' : '<p class="muted center" style="margin:0">يلزم طالب واحد على الأقل.</p>'}
+      </div></div>
+      <div class="panel">${leaderboard(null, true)}</div></div>`);
+      return;
+    }
+    swap(body, `<div class="layout"><div class="stack">
+      <div class="stage stack"><div class="kicker">نوع التحدي</div>${modeSw}<div class="kicker">مرحلة اختيار الأدوار</div>
+        <h3 style="font-size:28px">انضم <span class="num">${S.players.length}</span> طالبًا: <span style="color:var(--gold-t)">السائلون <span class="ltr">${a}/${cap()}</span></span> · <span style="color:var(--cyan-t)">المجيبون <span class="ltr">${b}/${cap()}</span></span></h3>
+        <p class="muted" style="margin:0">اعرض رمز الدخول أو QR، وانتظر حتى يختار الجميع أدوارهم. اضغط اسم أي طالب لتغيير دوره.</p>
+        <div class="grid2"><div><label for="l-dur">مدة التحدي (دقيقة)</label><input id="l-dur" type="number" min="1" max="180" value="${r.duration_min}"></div>
+        <div><label for="l-cap">وقت الالتقاط / الإجابة (ث)</label><div class="grid2"><input id="l-cap" type="number" min="5" max="300" value="${r.capture_secs}" aria-label="وقت الالتقاط"><input id="l-ans" type="number" min="5" max="300" value="${r.answer_secs}" aria-label="وقت الإجابة"></div></div></div>
+        ${LM() ? `<div class="grid2"><div><label for="l-prep">وقت التحضير (دقيقة)</label><input id="l-prep" type="number" min="1" max="60" value="${r.prep_min}"></div>
+          <div><label>صورة الدرس</label>${imgCtl()}</div></div><div id="t-img"></div>` : ''}
+        <button class="gold" data-act="start" style="min-height:64px;font-size:22px" ${a && b ? '' : 'disabled'}><span class="ic bob">🚀</span> ابدأ التحدي</button>
+        ${a && b ? '' : '<p class="muted center" style="margin:0">يلزم سائل واحد ومجيب واحد على الأقل.</p>'}
+      </div></div>
+      <div class="panel">${leaderboard(null, true)}</div></div>`);
+    if (LM()) imgPanel($('#t-img'), false);
+    return;
+  }
+  if (r.phase === 'ended') {
+    const key = JSON.stringify(['ended', S.players.map(p => p.id + p.score)]);
+    if (S.keys.body === key) return; S.keys.body = key;
+    body.innerHTML = endScreen(null) + `<p class="center" style="margin-top:16px"><button class="gold" data-act="ask-reset">تحدٍّ جديد بنفس الطلاب</button></p>`;
+    return;
+  }
+  if (!$('#t-stage', body)) { S.keys = {}; body.innerHTML = `<div class="layout"><div class="stack" style="gap:0"><div id="t-stage"></div><div id="t-board"></div><div id="t-img"></div></div><div class="panel" id="t-lb"></div></div>`; }
+  const prep = LM() && r.phase === 'l_prep';
+  if (TM() && S.selAt !== (r.tq || {}).at) { S.selAt = (r.tq || {}).at; S.sel = new Set(); }
+  const sk = stageKey();
+  if (S.keys.stage !== sk) { S.keys.stage = sk; swap($('#t-stage'), TM() ? tTeacherStage() : prep ? lTeacherPrep() : teacherStage()); }
+  $('#t-board').innerHTML = TM() ? tLog() : prep ? '' : renderBoard('teacher');
+  imgPanel($('#t-img'), LM());
+  $('#t-lb').innerHTML = leaderboard(null, true);
+}
+
+/* ---------- الطالب ---------- */
+async function startStudent(code) {
+  S.mode = 'student'; S.code = code; S.keys = {};
+  let room = null; try { room = await loadRoom(code); } catch {}
+  if (!room) { go(''); return renderStudentCode('لا توجد ساحة بهذا الرمز. تأكد من الرمز الذي يعرضه المعلم.'); }
+  S.room = room; go('code=' + code);
+  const saved = LS.get('qa2_player_' + code);
+  if (saved) {
+    try { await rpc('qa2_student', { p_token: saved.token, p_action: 'ping', p_args: {} }); S.me = saved; return studentPlay(); }
+    catch { LS.del('qa2_player_' + code); }
+  }
+  S.pickRole = null;
+  $('#app').innerHTML = `
+    <div class="form panel stack">
+      <div class="center"><div class="logo" style="font-size:40px">${esc(room.title)}</div></div>
+      <div><label for="in-name">اسمك</label><input id="in-name" maxlength="30" autocomplete="off"></div>
+      <p id="tmnote" class="center" style="margin:0;font-weight:700" ${room.mode === 'teacher' ? '' : 'hidden'}><span class="ic bob">🎤</span> في هذا التحدي يسأل المعلم، وكلكم مجيبون.</p>
+      <div id="pickwrap" ${room.mode === 'teacher' ? 'hidden' : ''}><label>اختر دورك في التحدي</label>
+        <div class="roles" id="pick">
+          <button class="rolecard asker" data-act="pick" data-role="asker"><b>سائل</b><span>${roleDesc('asker')}</span><em class="cnt" data-cnt="asker"></em></button>
+          <button class="rolecard answerer" data-act="pick" data-role="answerer"><b>مجيب</b><span>${roleDesc('answerer')}</span><em class="cnt" data-cnt="answerer"></em></button>
+        </div></div>
+      <button class="gold" data-act="join" style="min-height:58px;font-size:20px">دخول الساحة</button>
+    </div>`;
+  const counts = async () => {
+    if (!$('#pick')) return clearInterval(counts.h);
+    const [{ data }, { data: rm }] = await Promise.all([sb.from('qa2_players').select('role').eq('room_id', room.id).eq('kicked', false),
+      sb.from('qa2_rooms').select('mode,role_cap').eq('id', room.id).maybeSingle()]);
+    S.players = data || []; if (rm) Object.assign(S.room, rm);
+    if (!$('#pick')) return;
+    $('#pickwrap').hidden = TM(); $('#tmnote').hidden = !TM();
+    paintCounts($('#pick'), null);
+  };
+  counts(); clearInterval(counts.h); counts.h = setInterval(counts, 3000);
+}
+function paintCounts(root, mine) {
+  ['asker', 'answerer'].forEach(role => {
+    const n = roleCount(role), full = n >= cap() && mine !== role;
+    const card = root.querySelector('.rolecard.' + role); if (!card) return;
+    const c = card.querySelector('[data-cnt]'); if (c) c.textContent = full ? `اكتمل العدد ${n}/${cap()}` : `${n}/${cap()} طالب`;
+    card.disabled = full;
+    if (full && card.classList.contains('on') && mine !== role) { card.classList.remove('on'); if (S.pickRole === role) S.pickRole = null; }
+  });
+}
+async function sact(action, args = {}) {
+  try {
+    const d = await rpc('qa2_student', { p_token: S.me.token, p_action: action, p_args: args });
+    if (d && d.ok === false) toast(REASONS[d.reason] || 'غير متاح الآن', 'err');
+    await refresh('all'); return d;
+  } catch (e) {
+    toast(errText(e), 'err');
+    if (String(e.message || '').includes('NOT_JOINED')) { LS.del('qa2_player_' + S.code); setTimeout(() => location.reload(), 1200); }
+  }
+}
+function studentPlay() {
+  $('#app').innerHTML = hud(`<div class="me"><span id="s-name" style="font-weight:700"></span><span class="badge" id="s-role"></span><span class="pts num ltr" id="s-pts">0</span></div>`) + `<div id="s-body"></div>`;
+  subscribe(); refresh('all');
+  clearInterval(studentPlay.ping);
+  studentPlay.ping = setInterval(() => rpc('qa2_student', { p_token: S.me.token, p_action: 'ping', p_args: {} }).catch(e => {
+    if (String(e.message || '').includes('NOT_JOINED')) { LS.del('qa2_player_' + S.code); location.reload(); }
+  }), 20000);
+}
+function studentStage() {
+  const r = S.room, me = S.mePlayer || {}, t = (r.tiles || [])[r.active_tile] || {};
+  const mine = r.answerer_id === me.id, myQ = r.asker_id === me.id;
+  if (r.phase === 'review') return `<div class="stage stack center">
+      <div class="kicker">المربع ${r.active_tile + 1}</div>
+      <h2 style="font-size:clamp(26px,5vw,40px)">${myQ ? (LM() ? 'كنت الأسرع! +1، وسؤالك بانتظار اعتماد المعلم' : 'أُرسل سؤالك! بانتظار اعتماد المعلم') : `<span style="color:var(--gold-t)">${esc(pname(r.asker_id))}</span> أرسل سؤالًا`}</h2>
+      ${myQ ? `<div class="bigq" style="font-size:24px">${esc(t.q)}</div>` : '<p class="muted" style="margin:0">لوحة الأسئلة مقفلة حتى يُحسم هذا السؤال. استعدوا!</p>'}</div>`;
+  if (r.phase === 'capture') return `<div class="stage stack">
+      <div class="row between"><div class="kicker">سؤال ${esc(pname(r.asker_id))} · المربع ${r.active_tile + 1}</div>${ringHtml()}</div>
+      <div class="bigq">${esc(t.q)}</div><div class="center muted" data-pstate></div>
+      ${me.role === 'answerer' ? `<button class="capture" data-act="capture"><span class="ic beat">✋</span> التقط!</button>${LM() ? prepPicker('preview') : ''}` : `<p class="center muted" style="margin:0">المجيبون يتسابقون لالتقاط السؤال…</p>`}</div>`;
+  if (r.phase === 'answer') return `<div class="stage stack">
+      <div class="row between"><div class="kicker">${mine ? 'التقطت السؤال! أجب قبل انتهاء الوقت' : `التقطه <b style="color:var(--cyan-t)">${esc(pname(r.answerer_id))}</b> ويجيب الآن`}</div>${ringHtml()}</div>
+      <div class="bigq">${esc(t.q)}</div><div class="center muted" data-pstate></div>
+      ${mine && LM() ? prepPicker('answer') : ''}${mine ? `<textarea id="s-a" maxlength="300" placeholder="${LM() ? 'أو اكتب إجابة جديدة هنا' : 'اكتب إجابتك هنا'}"></textarea><button class="cyan" data-act="send-a" style="min-height:58px;font-size:20px">إرسال الإجابة</button>` : ''}</div>`;
+  if (r.phase === 'judge') return `<div class="stage stack">
+      <div class="kicker">إجابة <b style="color:var(--cyan-t)">${esc(pname(r.answerer_id))}</b> بانتظار حكم المعلم</div>
+      <div class="bigq">${esc(t.q)}</div><div class="biga">${esc(t.a)}</div></div>`;
+  if (r.phase === 'board' && LM()) return `<div class="stage stack"><h3 class="center" style="font-size:clamp(22px,4vw,30px)">${me.role === 'asker'
+      ? '<span style="color:var(--gold-t)">اطرح سؤالك الآن!</span> أسرع سائل ينال +1'
+      : '<span style="color:var(--cyan-t)">استعد!</span> التقط السؤال وأرسل إجابتك الجاهزة'}</h3>${me.role === 'asker' ? prepPicker('ask') : prepPicker('preview')}</div>`;
+  if (r.phase === 'board') return `<div class="stage center"><h3 style="font-size:clamp(22px,4vw,30px)">${me.role === 'asker'
+      ? '<span style="color:var(--gold-t)">لوحة الأسئلة مفتوحة!</span> اختر مربعًا فارغًا واكتب سؤالك'
+      : '<span style="color:var(--cyan-t)">استعد!</span> سيظهر السؤال هنا فور اعتماده'}</h3></div>`;
+  return '';
+}
+function updateStudent() {
+  const r = S.room; if (!r) return;
+  S.mePlayer = S.all.find(p => p.id === S.me.player_id) || null;
+  const me = S.mePlayer || { name: S.me.name, role: S.me.role, score: 0 };
+  $('#h-title').textContent = r.title; $('#h-code').textContent = r.code;
+  $('#s-name').textContent = me.name;
+  const rb = $('#s-role'); rb.textContent = ROLE[me.role]; rb.className = 'badge ' + me.role;
+  $('#s-pts').textContent = sc(me.score);
+  const body = $('#s-body');
+  if ($('#modal').dataset.kind === 'compose' && r.phase !== 'board') { closeModal(); toast('سبقك زميل بإرسال سؤال، انتظر فتح اللوحة', 'err'); }
+  if (r.phase === 'lobby') {
+    const key = JSON.stringify(['lobby', me.role, roleCount('asker'), roleCount('answerer'), r.mode]);
+    S.prep = null; body.dataset.lay = '';
+    if (S.keys.body === key) return; S.keys.body = key;
+    if (TM()) {
+      body.innerHTML = `<div class="form panel stack center"><div class="bigicon"><span class="ic float">🎤</span></div>
+        <h2 style="font-size:32px">أهلًا ${esc(me.name)}!</h2><p class="muted" style="margin:0">بانتظار المعلم لبدء التحدي. في هذا التحدي يسأل المعلم، وكلكم مجيبون.</p>
+        <div class="stack" style="gap:8px;text-align:right">
+          <div><span class="ic">✋</span> أسرع ثلاثة يلتقطون السؤال ويجيبون.</div>
+          <div><span class="ic">✅</span> الإجابة الصحيحة <b class="ltr">+3</b>، وأسرع إجابة صحيحة <b class="ltr">+1</b> إضافية.</div>
+          <div><span class="ic">⏰</span> من يلتقط ولا يجيب في الوقت <b class="ltr">−1</b>.</div>
+          <div><span class="ic">🗳️</span> قد يطرح المعلم الإجابات لتصويتكم، فتنال الأكثر أصواتًا النقاط.</div>
+        </div></div>`;
+      return;
+    }
+    body.innerHTML = `<div class="form panel stack center">
+      <h2 style="font-size:32px">أهلًا ${esc(me.name)}!</h2><p class="muted" style="margin:0">بانتظار المعلم لبدء التحدي. يمكنك تغيير دورك الآن.</p>
+      <div class="roles">
+        <button class="rolecard asker ${me.role === 'asker' ? 'on' : ''}" data-act="switch" data-role="asker"><b>سائل</b><span>${roleDesc('asker', true)}</span><em class="cnt" data-cnt="asker"></em></button>
+        <button class="rolecard answerer ${me.role === 'answerer' ? 'on' : ''}" data-act="switch" data-role="answerer"><b>مجيب</b><span>${roleDesc('answerer', true)}</span><em class="cnt" data-cnt="answerer"></em></button>
+      </div></div>`;
+    paintCounts(body, me.role);
+    return;
+  }
+  if (r.phase === 'ended') {
+    const key = JSON.stringify(['ended', S.players.map(p => p.id + p.score)]);
+    if (S.keys.body === key) return; S.keys.body = key;
+    body.dataset.lay = ''; body.innerHTML = endScreen(me.id); return;
+  }
+  const prep = LM() && r.phase === 'l_prep', lay = prep ? 'prep' : 'play';
+  if (body.dataset.lay !== lay || !$('#s-stage', body)) {
+    S.keys = {}; body.dataset.lay = lay;
+    body.innerHTML = prep ? `<div class="prepgrid"><div id="s-img"></div><div id="s-stage"></div></div>`
+      : `<div class="layout"><div class="stack" style="gap:0"><div id="s-stage"></div><div id="s-board"></div><div id="s-img"></div></div><div class="panel" id="s-lb"></div></div>`;
+  }
+  const sk = stageKey(prep ? me.role : me.role + JSON.stringify(me.prep || []));
+  if (S.keys.stage !== sk) { S.keys.stage = sk; swap($('#s-stage'), TM() ? tWatchStage(S.mePlayer || { id: S.me.player_id }) : prep ? lPrepStage(me) : studentStage()); }
+  imgPanel($('#s-img'), true);
+  if (prep) return;
+  $('#s-board').innerHTML = TM() ? tLog() : renderBoard('student');
+  $('#s-lb').innerHTML = leaderboard(me.id, false);
+}
+
+/* ---------- شاشة العرض ---------- */
+async function startBoard(code) {
+  S.mode = 'board'; S.code = code;
+  try { S.room = await loadRoom(code); } catch {}
+  if (!S.room) { $('#app').innerHTML = '<h2 class="center" style="padding-top:80px">لا توجد ساحة بهذا الرمز</h2>'; return; }
+  $('#app').innerHTML = hud(`<button class="sm" data-act="back">→ رجوع</button><img id="b-qr" alt="رمز QR للدخول" style="width:76px;height:76px;border-radius:10px;background:#fff;padding:4px;image-rendering:pixelated">`) + `<div id="b-body"></div>`;
+  $('#b-qr').src = qrImg(studentLink(), 4);
+  subscribe(); refresh('all');
+}
+function boardStage() {
+  const r = S.room, t = (r.tiles || [])[r.active_tile] || {};
+  if (r.phase === 'review') return `<div class="stage center"><h2 style="font-size:clamp(30px,5vw,56px)"><span style="color:var(--gold-t)">${esc(pname(r.asker_id))}</span> أرسل سؤالًا… بانتظار المعلم</h2></div>`;
+  if (r.phase === 'capture') return `<div class="stage stack"><div class="row between"><div class="kicker" style="font-size:20px;color:var(--hot)">التقطوا السؤال! · سؤال ${esc(pname(r.asker_id))}</div>${ringHtml()}</div><div class="bigq">${esc(t.q)}</div><div class="center muted" data-pstate></div></div>`;
+  if (r.phase === 'answer') return `<div class="stage stack"><div class="row between"><div class="kicker" style="font-size:20px">يجيب <b style="color:var(--cyan-t)">${esc(pname(r.answerer_id))}</b></div>${ringHtml()}</div><div class="bigq">${esc(t.q)}</div><div class="center muted" data-pstate></div></div>`;
+  if (r.phase === 'judge') return `<div class="stage stack"><div class="kicker" style="font-size:20px">إجابة ${esc(pname(r.answerer_id))}</div><div class="bigq">${esc(t.q)}</div><div class="biga">${esc(t.a)}</div></div>`;
+  if (r.phase === 'board') return `<div class="stage center"><h2 style="font-size:clamp(28px,4.5vw,48px)"><span style="color:var(--gold-t)">لوحة الأسئلة مفتوحة</span> · ${LM() ? 'من يطرح سؤاله أولًا؟' : 'من يكتب السؤال التالي؟'}</h2></div>`;
+  return '';
+}
+function updateBoard() {
+  const r = S.room; if (!r) return;
+  $('#h-title').textContent = r.title; $('#h-code').textContent = r.code;
+  const body = $('#b-body');
+  if (r.phase === 'lobby') {
+    const key = JSON.stringify(['lobby', S.players.map(p => p.id + p.role), r.mode]);
+    if (S.keys.body === key) return; S.keys.body = key;
+    body.innerHTML = `<div class="layout"><div class="stage stack center"><h1 style="font-size:clamp(36px,6vw,64px)">${TM() ? 'ادخلوا الساحة · المعلم يسأل' : LM() ? 'ادخلوا الساحة · شرح الدرس' : 'ادخلوا الساحة واختاروا أدواركم'}</h1>
+      <div class="qr"><img src="${qrImg(studentLink(), 8)}" alt="رمز QR للدخول"></div><div class="linkbox center" style="direction:ltr;font-size:20px">${esc(studentLink())}</div></div>
+      <div class="panel">${leaderboard(null, false)}</div></div>`;
+    return;
+  }
+  if (r.phase === 'ended') {
+    const key = JSON.stringify(['ended', S.players.map(p => p.id + p.score)]);
+    if (S.keys.body === key) return; S.keys.body = key;
+    body.innerHTML = endScreen(null); return;
+  }
+  if (!$('#b-stage', body)) { S.keys = {}; body.innerHTML = `<div class="layout"><div class="stack" style="gap:0"><div id="b-stage"></div><div id="b-board"></div><div id="b-img"></div></div><div class="panel" id="b-lb"></div></div>`; }
+  const prep = LM() && r.phase === 'l_prep', sk = stageKey();
+  if (S.keys.stage !== sk) { S.keys.stage = sk; $('#b-stage').innerHTML = TM() ? tWatchStage(null, true) : prep ? lBoardPrep() : boardStage(); }
+  $('#b-board').innerHTML = TM() ? tLog() : prep ? '' : renderBoard('board');
+  imgPanel($('#b-img'), false);
+  $('#b-lb').innerHTML = leaderboard(null, false);
+}
+
+function update() {
+  phaseSounds();
+  if (S.mode === 'teacher') updateTeacher();
+  else if (S.mode === 'student') updateStudent();
+  else if (S.mode === 'board') updateBoard();
+  tick();
+}
+
+/* ---------- النوافذ ---------- */
+function openModal(html, kind = '') { const m = $('#modal'); m.innerHTML = `<div class="panel stack">${html}</div>`; m.dataset.kind = kind; m.hidden = false; }
+function closeModal() { const m = $('#modal'); m.hidden = true; m.innerHTML = ''; m.dataset.kind = ''; }
+function qrImg(text, cell = 8) { try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createDataURL(cell, 2); } catch { return ''; } }
+function viewTile(i) {
+  const t = (S.room.tiles || [])[i] || {}; if (!t.q) return;
+  const hidden = S.mode !== 'teacher' && t.status === 'review';
+  openModal(`<div class="kicker muted" style="font-weight:700">المربع ${i + 1} · ${tileStatusText(t) || (t.status === 'done' ? 'إجابة صحيحة' : t.status === 'wrong' ? 'إجابة خاطئة' : '')}</div>
+    <div><label style="color:var(--gold-t)">السؤال · ${esc(pname(t.asker))}${(t.qpts || 0) + (t.qs || 0) ? ` (+${(t.qpts || 0) + (t.qs || 0)})` : ''}</label><div class="bigq" style="font-size:22px;text-align:right;margin:0">${hidden ? 'قيد مراجعة المعلم' : esc(t.q)}</div></div>
+    ${t.answerer ? `<div><label style="color:var(--cyan-t)">الإجابة · ${esc(pname(t.answerer))}${t.apts != null ? ` (${t.apts > 0 ? '+' + t.apts : t.apts === -1 ? '−1' : '0'})` : ''}</label><div style="font-size:20px;font-weight:700">${t.a ? esc(t.a) : '—'}</div></div>` : ''}
+    <button class="ghost" data-act="close">إغلاق</button>`);
+}
+
+/* ---------- الأحداث ---------- */
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const a = b.dataset.act;
+  const lock = async fn => { b.disabled = true; try { await fn(); } finally { b.disabled = false; } };
+  if (b.tagName === 'BUTTON' && !['mute', 'tvote', 't-capture', 'capture'].includes(a)) SFX.tap();
+  switch (a) {
+    case 'mute': S.mute = !S.mute; LS.set('qa2_mute', S.mute); document.querySelectorAll('[data-act="mute"]').forEach(x => x.textContent = S.mute ? '🔇' : '🔊'); if (!S.mute) SFX.ok(); break;
+    case 'mode-pick': S.newMode = b.dataset.mode; document.querySelectorAll('#modes .modecard').forEach(x => x.classList.toggle('on', x === b)); $('#vote-wrap').hidden = S.newMode !== 'teacher'; $('#prep-wrap').hidden = S.newMode !== 'lesson'; break;
+    case 'fs': try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch {} break;
+    case 'img-pick': $('#img-file').click(); break;
+    case 'img-del': await lock(() => act('set_image', { data: '' })); break;
+    case 'end-prep': await lock(() => act('end_prep')); break;
+    case 'tool': S.tool = b.dataset.tool; document.querySelectorAll('.inktools .tool').forEach(x => x.classList.toggle('on', x.dataset.tool === S.tool)); document.querySelectorAll('.inkwrap').forEach(x => x.classList.toggle('hand', S.tool === 'hand' || !x.querySelector('canvas'))); break;
+    case 'ink-color': S.color = b.dataset.c; if (S.tool === 'hand' || S.tool === 'er') { S.tool = 'pen'; document.querySelectorAll('.inktools .tool').forEach(x => x.classList.toggle('on', x.dataset.tool === 'pen')); document.querySelectorAll('.inkwrap').forEach(x => x.classList.toggle('hand', !x.querySelector('canvas'))); } document.querySelectorAll('.inktools .sw').forEach(x => x.classList.toggle('on', x === b)); break;
+    case 'ink-undo': S.ink.strokes.pop(); inkSave(); inkDrawAll(); break;
+    case 'ink-clear': if (S.ink.strokes.length && confirm('مسح كل ما رسمته على الصورة؟')) { S.ink.strokes = []; inkSave(); inkDrawAll(); } break;
+    case 'ink-full': { const p = $('#inkp'); if (p) { p.classList.toggle('full'); setTimeout(inkDrawAll, 50); } break; }
+    case 'prep-add': S.prep.push(''); $('#prep-list').innerHTML = prepRows(S.mePlayer && S.mePlayer.role === 'asker'); { const t = document.querySelectorAll('#prep-list textarea'); t[t.length - 1].focus(); } break;
+    case 'prep-del': S.prep.splice(+b.dataset.i, 1); if (!S.prep.length) S.prep.push(''); $('#prep-list').innerHTML = prepRows(S.mePlayer && S.mePlayer.role === 'asker'); savePrep(); break;
+    case 'prep-ask': await lock(async () => {
+      const t = myPrep()[+b.dataset.i], tile = (S.room.tiles || []).findIndex(x => !x.q);
+      if (!t || tile < 0) return toast('لا يوجد مربع فارغ الآن', 'err');
+      const d = await sact('claim', { tile, text: t }); if (d && d.ok) toast('كنت الأسرع! +1 للسرعة، وسؤالك عند المعلم', 'win');
+    }); break;
+    case 'prep-ans': await lock(async () => { const d = await sact('answer', { text: myPrep()[+b.dataset.i] }); if (d && d.ok) toast('أُرسلت إجابتك', 'win'); }); break;
+    case 'set-mode': if (S.room.mode !== b.dataset.mode) await lock(() => act('set_mode', { mode: b.dataset.mode })); break;
+    case 't-ask': { const t = $('#t-q').value.trim(); if (!t) return toast(ERRORS.EMPTY, 'err'); await lock(async () => { if (await act('t_ask', { text: t })) { const x = $('#t-q'); if (x) x.value = ''; } }); break; }
+    case 't-close-cap': await lock(() => act('t_close_capture')); break;
+    case 't-end-ans': await lock(() => act('t_end_answer')); break;
+    case 'tsel': { const i = +b.dataset.i; S.sel.has(i) ? S.sel.delete(i) : S.sel.add(i); S.keys.stage = null; updateTeacher(); break; }
+    case 't-judge': await lock(async () => { if (await act('t_judge', { correct: [...S.sel] })) { if (!S.sel.size) SFX.bad(); } }); break;
+    case 't-vote': await lock(() => act('t_vote', { seconds: +($('#t-vs') || {}).value || S.room.vote_secs })); break;
+    case 't-close-vote': await lock(() => act('t_close_vote')); break;
+    case 't-cancel': await lock(() => act('t_cancel')); break;
+    case 't-capture': await lock(async () => { const d = await sact('t_capture'); if (d && d.ok) { SFX.capture(); buzz([60, 40, 60]); toast(`التقطته! أنت رقم ${d.slot}، أجب بسرعة`, 'win'); } }); break;
+    case 't-send-a': { const t = $('#s-a').value.trim(); if (!t) return toast(ERRORS.EMPTY, 'err'); await lock(async () => { const d = await sact('t_answer', { text: t }); if (d && d.ok) { SFX.ok(); toast('أُرسلت إجابتك', 'win'); } }); break; }
+    case 'tvote': await lock(async () => { const d = await sact('t_vote', { idx: +b.dataset.i }); if (d && d.ok) { SFX.vote(); buzz(40); toast('سُجّل صوتك', 'win'); } }); break;
+    case 'home': go(''); renderHome(); break;
+    case 'home-teacher': teacherEntry(); break;
+    case 'back': if (history.length > 1) history.back(); else location.href = baseUrl() + (LS.get('qa2_teacher') ? '?t=' + S.code : ''); break;
+    case 'gate': await lock(async () => {
+      const m = $('#in-master').value.trim(); if (!m) return toast('أدخل الرقم السري', 'err');
+      let ok = false; try { ok = await rpc('qa2_check_master', { p_pin: m }); } catch (err) { return toast(errText(err), 'err'); }
+      if (!ok) { $('#in-master').value = ''; return toast('الرقم السري غير صحيح', 'err'); }
+      LS.set('qa2_master', m); renderTeacherLogin(S.gateCode);
+    }); break;
+    case 'home-student': renderStudentCode(); break;
+    case 'resume-teacher': { const s = LS.get('qa2_teacher'); startTeacher(s.code, s.pin); break; }
+    case 'code-go': { const c = $('#in-code').value.trim(); if (!/^\d{4}$/.test(c)) return toast('الرمز من 4 أرقام', 'err'); startStudent(c); break; }
+    case 'create': await lock(async () => {
+      const pin = LS.get('qa2_master'); if (!pin) return teacherEntry();
+      try {
+        const d = await rpc('qa2_create_room', { p_pin: pin, p_title: $('#in-title').value, p_cfg: { duration_min: +$('#in-dur').value, capture_secs: +$('#in-cap').value, answer_secs: +$('#in-ans').value } });
+        if (S.newMode !== 'peer') {
+          await rpc('qa2_teacher', { p_code: d.code, p_pin: pin, p_action: 'set_mode', p_args: { mode: S.newMode } });
+          await rpc('qa2_teacher', { p_code: d.code, p_pin: pin, p_action: 'config', p_args: { vote_secs: +$('#in-vote').value, prep_min: +$('#in-prep').value } });
+        }
+        await startTeacher(d.code, pin);
+      } catch (err) { toast(errText(err), 'err'); }
+    }); break;
+    case 'resume-login': { const c = $('#in-rcode').value.trim(), p = LS.get('qa2_master'); if (!/^\d{4}$/.test(c)) return toast('رمز الساحة من 4 أرقام', 'err'); if (!p) return teacherEntry(c); startTeacher(c, p); break; }
+    case 'start': await lock(async () => {
+      if (await act('config', { duration_min: +$('#l-dur').value, capture_secs: +$('#l-cap').value, answer_secs: +$('#l-ans').value, vote_secs: +($('#l-vote') || {}).value || undefined, prep_min: +($('#l-prep') || {}).value || undefined })) await act('start');
+    }); break;
+    case 'approve': await lock(() => act('approve_q')); break;
+    case 'reject': await lock(() => act('reject_q')); break;
+    case 'judge': await lock(async () => { const ok = b.dataset.v === '1'; if (await act('judge', { correct: ok }) && !ok) SFX.bad(); }); break;
+    case 'cancel-q': await lock(() => act('cancel_q')); break;
+    case 't-pause': await lock(() => act('timer_pause')); break;
+    case 't-resume': await lock(() => act('timer_resume')); break;
+    case 't-add': await lock(() => act('timer_add', { seconds: +b.dataset.s })); break;
+    case 'c-pause': await lock(() => act('challenge_pause')); break;
+    case 'c-resume': await lock(() => act('challenge_resume')); break;
+    case 'c-add': await lock(() => act('challenge_add', { minutes: +b.dataset.m })); break;
+    case 'new-board': await lock(() => act('new_board')); break;
+    case 'ask-end': openModal(`<h3>إنهاء التحدي الآن؟</h3><p>ستُرصد النقاط الحالية ويُعلن الفائزون.</p>
+      <div class="row"><button class="bad" data-act="end" style="flex:1">نعم، أنهِ التحدي</button><button class="ghost" data-act="close">إلغاء</button></div>`); break;
+    case 'end': await act('end_now'); closeModal(); break;
+    case 'ask-reset': openModal(`<h3>تحدٍّ جديد؟</h3><p>ستعود نقاط الجميع إلى صفر، ويرجع الطلاب لاختيار أدوارهم.</p>
+      <div class="row"><button class="gold" data-act="reset" style="flex:1">نعم، ابدأ من جديد</button><button class="ghost" data-act="close">إلغاء</button></div>`); break;
+    case 'reset': await act('reset'); closeModal(); break;
+    case 'player': {
+      const p = S.players.find(x => x.id === b.dataset.p); if (!p) return;
+      openModal(`<h3>${esc(p.name)} ${TM() ? '' : `<span class="badge ${p.role}">${ROLE[p.role]}</span>`}</h3>
+        ${TM() ? '' : `<div class="roles"><button class="rolecard asker ${p.role === 'asker' ? 'on' : ''}" data-act="set-role" data-p="${p.id}" data-role="asker"><b>سائل</b></button>
+        <button class="rolecard answerer ${p.role === 'answerer' ? 'on' : ''}" data-act="set-role" data-p="${p.id}" data-role="answerer"><b>مجيب</b></button></div>`}
+        ${LM() && (p.prep || []).length ? `<div><label>ما جهّزه (${p.prep.length})</label><ol style="margin:0;padding-inline-start:22px">${p.prep.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}
+        <div class="row" style="justify-content:center"><button data-act="pscore" data-p="${p.id}" data-d="-1">−1 نقطة</button><b class="num ltr" style="font-family:var(--display);font-size:34px;min-width:60px;text-align:center">${sc(p.score)}</b><button data-act="pscore" data-p="${p.id}" data-d="1">+1 نقطة</button></div>
+        <div class="row"><button class="bad" data-act="kick" data-p="${p.id}">إخراج من الساحة</button><button class="ghost" data-act="close" style="flex:1">إغلاق</button></div>`);
+      break;
+    }
+    case 'set-role': await act('set_role', { player: b.dataset.p, role: b.dataset.role }); closeModal(); break;
+    case 'pscore': await act('score', { player: b.dataset.p, delta: +b.dataset.d }); closeModal(); break;
+    case 'kick': await act('kick', { player: b.dataset.p }); closeModal(); break;
+    case 'share': {
+      const link = studentLink();
+      openModal(`<h3>دخول الطلاب</h3><p class="muted" style="margin:0">امسح الرمز أو افتح الرابط، ثم اكتب الاسم واختر الدور.</p>
+        <div class="qr"><img src="${qrImg(link, 8)}" alt="رمز QR لرابط الطلاب"></div>
+        <div class="linkbox" id="m-link">${esc(link)}</div>
+        <div class="row"><button class="gold" style="flex:1" data-act="copy">نسخ الرابط</button><button class="ghost" data-act="close">إغلاق</button></div>`);
+      break;
+    }
+    case 'copy': {
+      try { await navigator.clipboard.writeText(studentLink()); toast('تم نسخ الرابط'); }
+      catch { const rg = document.createRange(); rg.selectNodeContents($('#m-link')); getSelection().removeAllRanges(); getSelection().addRange(rg); toast('حدّد الرابط وانسخه'); }
+      break;
+    }
+    case 'settings':
+      openModal(`<h3>الإعدادات</h3>
+        <div><label for="m-title">اسم التحدي</label><input id="m-title" maxlength="60" value="${esc(S.room.title)}"></div>
+        <div class="grid2"><div><label for="m-cap">وقت الالتقاط (ث)</label><input id="m-cap" type="number" min="5" max="300" value="${S.room.capture_secs}"></div>
+        <div><label for="m-ans">وقت الإجابة (ث)</label><input id="m-ans" type="number" min="5" max="300" value="${S.room.answer_secs}"></div></div>
+        ${TM() ? `<div><label for="m-vote">وقت التصويت (ث)</label><input id="m-vote" type="number" min="5" max="300" value="${S.room.vote_secs}"></div>` : ''}
+        <button class="gold" data-act="save-settings">حفظ</button>
+        ${S.room.phase !== 'lobby' ? '<button data-act="ask-reset">تحدٍّ جديد (تصفير النقاط)</button>' : ''}
+        <details><summary class="muted" style="cursor:pointer;font-weight:700">تغيير الرقم السري للمعلم</summary><div class="stack" style="margin-top:10px">
+          <input id="m-old" type="password" inputmode="numeric" placeholder="الرقم الحالي" aria-label="الرقم الحالي"><input id="m-new" type="password" inputmode="numeric" placeholder="الرقم الجديد (4 أرقام أو أكثر)" aria-label="الرقم الجديد">
+          <button data-act="change-master">حفظ الرقم الجديد</button></div></details>
+        <button class="ghost" data-act="logout">الخروج من لوحة المعلم</button>
+        <button class="ghost" data-act="close">إغلاق</button>`);
+      break;
+    case 'save-settings': await act('config', { title: $('#m-title').value, capture_secs: +$('#m-cap').value, answer_secs: +$('#m-ans').value, vote_secs: +($('#m-vote') || {}).value || undefined }); S.keys = {}; closeModal(); break;
+    case 'logout': LS.del('qa2_teacher'); LS.del('qa2_master'); closeModal(); location.href = baseUrl(); break;
+    case 'change-master': await lock(async () => {
+      try { await rpc('qa2_change_master', { p_old: $('#m-old').value.trim(), p_new: $('#m-new').value.trim() }); LS.set('qa2_master', $('#m-new').value.trim()); toast('تم تغيير الرقم السري', 'win'); closeModal(); }
+      catch (err) { toast(errText(err), 'err'); }
+    }); break;
+    case 'close': closeModal(); break;
+    case 'view': viewTile(+b.dataset.tile); break;
+    case 'pick': document.querySelectorAll('#pick .rolecard').forEach(x => x.classList.toggle('on', x === b)); S.pickRole = b.dataset.role; break;
+    case 'join': await lock(async () => {
+      const name = $('#in-name').value.trim(); if (!name) return toast(ERRORS.EMPTY_NAME, 'err');
+      const role = TM() ? 'answerer' : S.pickRole;
+      if (!role) return toast('اختر دورك: سائل أو مجيب', 'err');
+      try {
+        const d = await rpc('qa2_join', { p_code: S.code, p_name: name, p_role: role });
+        S.me = { token: d.token, player_id: d.player_id, name, role };
+        LS.set('qa2_player_' + S.code, S.me); studentPlay();
+      } catch (err) { toast(errText(err), 'err'); }
+    }); break;
+    case 'switch': await lock(() => sact('set_role', { role: b.dataset.role })); break;
+    case 'compose': {
+      const i = +b.dataset.tile;
+      openModal(`<h3><span style="color:var(--gold-t)">المربع ${i + 1}</span> · اكتب سؤالك</h3>
+        <p class="muted" style="margin:0">سؤال واحد واضح. عند الإرسال تُقفل اللوحة أمام زملائك حتى يُحسم سؤالك.</p>
+        <textarea id="m-q" maxlength="300" placeholder="اكتب السؤال هنا"></textarea>
+        <div class="row"><button class="gold" data-act="send-q" data-tile="${i}" style="flex:1;min-height:56px;font-size:19px">إرسال السؤال</button><button class="ghost" data-act="close">إلغاء</button></div>`, 'compose');
+      $('#m-q').focus(); break;
+    }
+    case 'send-q': await lock(async () => {
+      const t = $('#m-q').value.trim(); if (!t) return toast(ERRORS.EMPTY, 'err');
+      $('#modal').dataset.kind = '';
+      const d = await sact('claim', { tile: +b.dataset.tile, text: t });
+      if (d && d.ok) { closeModal(); toast('أُرسل سؤالك إلى المعلم', 'win'); } else $('#modal').dataset.kind = 'compose';
+    }); break;
+    case 'capture': await lock(async () => { const d = await sact('capture'); if (d && d.ok) { toast('التقطته! أجب بسرعة', 'win'); try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch {} } }); break;
+    case 'send-a': { const t = $('#s-a').value.trim(); if (!t) return toast(ERRORS.EMPTY, 'err'); await lock(async () => { const d = await sact('answer', { text: t }); if (d && d.ok) toast('أُرسلت إجابتك', 'win'); }); break; }
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'in-code') $('[data-act="code-go"]').click();
+  if (e.key === 'Enter' && e.target.id === 'in-master') $('[data-act="gate"]').click();
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); }
+});
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+boot();
+</script>
+</body>
+</html>
