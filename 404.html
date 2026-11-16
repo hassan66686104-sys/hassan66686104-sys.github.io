@@ -3,6 +3,8 @@
 (function(){
   var sites=['nabd-alfahm','mihwar','fasli-live','itqan-hifz-class','knowledge-hunter-ar','qsts-class-portal','legendary-trifle-836446','maarifa-arena','qur3at-alsaf-camera','tafaul-alsaf','group-worksheet-ar'];
   var p=location.pathname, seg=p.split('/')[1]||'';
+  var spa=['mihwar'];
+  if(spa.indexOf(seg)!==-1){ location.replace('/'+seg+'/?__p='+encodeURIComponent(p.slice(seg.length+1)+location.search+location.hash)); return; }
   if(sites.indexOf(seg)===-1){
     var last=null; try{last=sessionStorage.getItem('lastSite')}catch(e){}
     if(last){ location.replace('/'+last+p+location.search+location.hash); return; }

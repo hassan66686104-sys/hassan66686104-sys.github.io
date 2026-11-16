@@ -1,0 +1,2 @@
+function r(o){const c=t=>{const n=t==null?"":String(t),e=/^[=+\-@\t\r]/.test(n)?`'${n}`:n;return/[",\n\r]/.test(e)?`"${e.replace(/"/g,'""')}"`:e};return o.map(t=>t.map(c).join(",")).join(`\r
+`)}function s(o,c){const t=new Blob(["\uFEFF"+r(c)],{type:"text/csv;charset=utf-8"}),n=URL.createObjectURL(t),e=document.createElement("a");e.href=n,e.download=o,document.body.appendChild(e),e.click(),e.remove(),setTimeout(()=>URL.revokeObjectURL(n),1e3)}export{s as d};
