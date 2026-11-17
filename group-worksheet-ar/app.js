@@ -44,8 +44,9 @@ function toast(msg) {
 function errMsg(e) { return (e && (e.message || e.error_description)) || "حدث خطأ، حاول مرة أخرى"; }
 function avatar(st, size = "") {
   const cls = `av ${size} g${st?.group_no || 1}`;
-  if (st?.photo) return `<img class="${cls}" src="${esc(st.photo)}" alt="">`;
-  const initial = (st?.name || "؟").trim().charAt(0);
+  // لا صور للطلاب: تظهر الدائرة برقم الطالب
+  const nm = String(st?.name || "؟").trim();
+  const initial = (nm.match(/[0-9٠-٩]+/) || [nm.charAt(0)])[0];
   return `<span class="${cls}" aria-hidden="true">${esc(initial)}</span>`;
 }
 function levelFrom(text) {
@@ -63,25 +64,6 @@ function groupFrom(text) {
   if (/ثالث/.test(t)) return 3;
   if (/رابع/.test(t)) return 4;
   return 1;
-}
-function resizeImage(file, size = 192) {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onerror = reject;
-    fr.onload = () => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = c.height = size;
-        const s = Math.min(img.width, img.height);
-        c.getContext("2d").drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
-        resolve(c.toDataURL("image/jpeg", 0.82));
-      };
-      img.src = fr.result;
-    };
-    fr.readAsDataURL(file);
-  });
 }
 
 /* ---------- data ---------- */
@@ -465,8 +447,8 @@ function tStudents() {
   const list = S.students;
   const row = (s) => `
     <tr data-sid="${s.id}">
-      <td><div class="photo-cell">${avatar(s)}<label class="file-label">تغيير<input type="file" accept="image/*" data-input="photo" data-id="${s.id}"></label>${s.photo ? `<button class="ghost small" data-act="clear-photo" data-id="${s.id}">حذف</button>` : ""}</div></td>
-      <td><input id="sn-${s.id}" value="${esc(s.name)}" data-input="stu-field" data-field="name" data-id="${s.id}" aria-label="الاسم"></td>
+      <td><div class="photo-cell">${avatar(s)}</div></td>
+      <td><input id="sn-${s.id}" value="${esc(s.name)}" data-input="stu-field" data-field="name" data-id="${s.id}" aria-label="رقم الطالب"></td>
       <td><select id="sg-${s.id}" data-input="stu-field" data-field="group_no" data-id="${s.id}" aria-label="المجموعة">${[1, 2, 3, 4].map((g) => `<option value="${g}" ${s.group_no === g ? "selected" : ""}>${GROUP_NAMES[g].replace("المجموعة ", "")}</option>`).join("")}</select></td>
       <td><select id="sl-${s.id}" data-input="stu-field" data-field="level" data-id="${s.id}" aria-label="المستوى">${Object.entries(LEVELS).map(([k, l]) => `<option value="${k}" ${s.level === k ? "selected" : ""}>${l}</option>`).join("")}</select></td>
       <td><button class="ghost small" data-act="archive-student" data-id="${s.id}">إزالة</button></td>
@@ -476,7 +458,7 @@ function tStudents() {
   const groupTables = [1, 2, 3, 4].map((g) => {
     const members = list.filter((s) => s.group_no === g);
     return `<div class="gtable g${g}"><h3>${GROUP_NAMES[g]} <span class="small">(${members.length} طلاب: ${lvlCount(members)})</span></h3>
-      ${members.length ? `<div class="table-wrap"><table><thead><tr><th>الصورة</th><th>الاسم</th><th>المجموعة</th><th>المستوى</th><th></th></tr></thead><tbody>${members.map(row).join("")}</tbody></table></div>` : `<p class="muted small">لا يوجد طلاب.</p>`}</div>`;
+      ${members.length ? `<div class="table-wrap"><table><thead><tr><th></th><th>الرقم</th><th>المجموعة</th><th>المستوى</th><th></th></tr></thead><tbody>${members.map(row).join("")}</tbody></table></div>` : `<p class="muted small">لا يوجد طلاب.</p>`}</div>`;
   }).join("");
   return `
     <div class="paper stack">
@@ -503,9 +485,9 @@ function tStudents() {
       <div class="class-tabs" role="tablist" aria-label="اختر الصف">${S.classes.map((c) => `<button role="tab" aria-selected="${c.id === S.tClass}" data-act="pick-class" data-id="${c.id}">${esc(c.name)}</button>`).join("")}</div>
       <p class="muted small" style="margin:0">اختر الصف أعلاه لتعديل مستويات طلابه فقط. التعديلات تُحفظ تلقائيًا. الأساسي يأخذ أسئلة اختيار وصح وخطأ، والمتوسط والمتقدم أسئلة مقالية.</p>
       ${list.length ? `<div class="gtables">${groupTables}</div>`
-      : `<div class="notice">لا يوجد طلاب في هذا الصف. أضفهم بالأسفل، أو أنشئ 16 طالبًا تجريبيًا وعدّل أسماءهم لاحقًا. <button class="small" data-act="seed-students">إنشاء 4 مجموعات × 4 طلاب</button></div>`}
+      : `<div class="notice">لا يوجد طلاب في هذا الصف. أضفهم بالأسفل، أو أنشئ 16 طالبًا تجريبيًا وعدّل أرقامهم لاحقًا. <button class="small" data-act="seed-students">إنشاء 4 مجموعات × 4 طلاب</button></div>`}
       <form class="row" data-form="add-student">
-        <input id="ns-name" placeholder="اسم الطالب" required style="flex:2;min-width:160px">
+        <input id="ns-name" placeholder="رقم الطالب، مثل: طالب 17" required style="flex:2;min-width:160px">
         <select id="ns-group" style="flex:1;min-width:130px">${[1, 2, 3, 4].map((g) => `<option value="${g}">${GROUP_NAMES[g]}</option>`).join("")}</select>
         <select id="ns-level" style="flex:1;min-width:110px">${Object.entries(LEVELS).map(([k, l]) => `<option value="${k}" ${k === "mid" ? "selected" : ""}>${l}</option>`).join("")}</select>
         <button type="submit">إضافة طالب</button>
@@ -513,9 +495,9 @@ function tStudents() {
     </div>
     ${S.tClass ? loginsPanel() : ""}
     <div class="paper stack">
-      <h2>إضافة قائمة أسماء دفعة واحدة</h2>
-      <p class="muted small" style="margin:0">سطر لكل طالب بالشكل: الاسم، رقم المجموعة، المستوى (أساسي أو متوسط أو متقدم). مثال: <b>أحمد علي، 2، متقدم</b></p>
-      <textarea id="bulk" rows="6" placeholder="سارة محمد، 1، متوسط&#10;خالد سعيد، 1، أساسي"></textarea>
+      <h2>إضافة قائمة طلاب دفعة واحدة</h2>
+      <p class="muted small" style="margin:0">سطر لكل طالب بالشكل: رقم الطالب، رقم المجموعة، المستوى (أساسي أو متوسط أو متقدم). مثال: <b>طالب 17، 2، متقدم</b></p>
+      <textarea id="bulk" rows="6" placeholder="طالب 17، 1، متوسط&#10;طالب 18، 1، أساسي"></textarea>
       <div><button data-act="bulk-add">إضافة الأسماء</button></div>
     </div>` : `<div class="paper empty-state"><p class="muted">أضف صفًا أولًا.</p></div>`}`;
 }
@@ -1027,7 +1009,6 @@ document.addEventListener("click", async (ev) => {
       case "archive-student":
         if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "تأكيد الإزالة"; return; }
         await teacher("save_student", { id: b.dataset.id, archived: true }); toast("أُزيل الطالب"); route(true); break;
-      case "clear-photo": await teacher("save_student", { id: b.dataset.id, photo: null }); route(true); break;
       case "seed-students": {
         const lv = ["high", "mid", "mid", "low"];
         for (let g = 1; g <= 4; g++) for (let i = 0; i < 4; i++)
@@ -1185,10 +1166,6 @@ document.addEventListener("change", async (ev) => {
       toast("حُفظ");
     } else if (k === "import-file" && el.files?.[0]) {
       await importQuestions(el.files[0]); el.value = "";
-    } else if (k === "photo" && el.files?.[0]) {
-      const data = await resizeImage(el.files[0]);
-      await teacher("save_student", { id: el.dataset.id, photo: data });
-      toast("حُفظت الصورة"); route(true);
     }
   } catch (e) { toast(errMsg(e)); }
 });

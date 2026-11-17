@@ -56,9 +56,6 @@ h1 { font-size: 1.5rem; } h2 { font-size: 1.15rem; } h3 { font-size: 1rem; }
 .wrap { width: min(1240px, 100% - 32px); margin: 0 auto; }
 
 /* header: official logo band, navy bar, navy footer */
-.logo-band { background: #fff; border-bottom: 1px solid var(--rule); }
-.logo-band .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 10px; }
-.logo-band img { height: 62px; width: auto; display: block; }
 .site-head .navbar { background: var(--bar); color: #fff; box-shadow: 0 6px 20px rgba(22, 35, 61, .25); position: relative; overflow: hidden; }
 .site-head .navbar::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
   background-image: radial-gradient(circle at 12% 30%, rgba(255,255,255,.35) 0 1.5px, transparent 2px), radial-gradient(circle at 70% 70%, rgba(255,255,255,.25) 0 1.5px, transparent 2px), radial-gradient(circle at 40% 15%, rgba(255,255,255,.3) 0 1px, transparent 1.5px), radial-gradient(circle at 88% 25%, rgba(255,255,255,.3) 0 1px, transparent 1.5px); }
@@ -250,7 +247,6 @@ details summary { cursor: pointer; }
   .groups-pick { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 560px) {
-  .logo-band img { height: 40px; }
   .q-grid { grid-template-columns: 1fr; }
   .groups-pick { grid-template-columns: 1fr; }
   .brand b { font-size: 1.2rem; }
@@ -261,10 +257,6 @@ details summary { cursor: pointer; }
 </head>
 <body>
 <header class="site-head">
-  <div class="logo-band"><div class="wrap">
-    <img src="brand/ministry.png" alt="وزارة التربية والتعليم والتعليم العالي - دولة قطر">
-    <img src="brand/school.png" alt="مدرسة قطر للعلوم والتكنولوجيا الإعدادية الثانوية للبنين">
-  </div></div>
   <div class="navbar"><div class="wrap">
     <a class="brand" href="#/"><span class="brand-badge" aria-hidden="true">✎</span><span><b>ورقة العمل الجماعية</b><small>إعداد <em>الأستاذ الحسن علي</em></small></span></a>
     <nav class="row" id="nav"></nav>
